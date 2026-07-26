@@ -1,1 +1,5 @@
 * @LuisR385
+
+# ベンダー提供の外部ライブラリについては、意図的にコードの所有者を設定していません
+/thirdparty/DxLib/
+/thirdparty/imgui/
