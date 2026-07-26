@@ -24,3 +24,6 @@ DxLImGui_RenderTarget_Alpha_Check.png
 
 # Local-only files that are not redistributable
 local/
+
+# dist files
+dist/
