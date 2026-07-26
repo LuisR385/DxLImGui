@@ -1,0 +1,103 @@
+name: 機能提案
+description: DxLImGuiのAPI、動作、文書などの改善を提案します
+title: "[Feature]: "
+labels: []
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        機能提案ありがとうございます。目的や利用場面が分かるように記入してください。
+
+        現在の対応範囲と既知の制限について、提案前にREADMEをご確認ください。
+
+  - type: checkboxes
+    id: preliminary_checks
+    attributes:
+      label: 事前確認
+      options:
+        - label: 同じ内容のIssueがないことを確認しました。
+          required: true
+        - label: READMEの機能一覧と「制限事項」を確認しました。
+          required: true
+
+  - type: dropdown
+    id: affected_area
+    attributes:
+      label: 関連する領域
+      options:
+        - Simple API
+        - Object API
+        - Advanced API
+        - Image
+        - RenderTarget
+        - 初期化・終了処理
+        - Win32 / DirectX 11バックエンド
+        - ビルド・導入
+        - ドキュメント
+        - サンプル
+        - その他
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 解決したい問題
+      description: 現在困っていることや、改善したい理由を記載してください。
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: 想定する利用場面
+      description: どのようなアプリケーションや処理で必要になるかを記載してください。
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 提案内容
+      description: 希望するAPIや動作を具体的に記載してください。
+    validations:
+      required: true
+
+  - type: textarea
+    id: api_example
+    attributes:
+      label: APIの使用例
+      description: APIの追加・変更を提案する場合は、想定する使用例を記載してください。
+      render: cpp
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 検討した代替案
+      description: 現在のAPIで試した方法や、他に考えられる解決方法があれば記載してください。
+
+  - type: dropdown
+    id: compatibility
+    attributes:
+      label: 互換性への影響
+      options:
+        - 既存の公開APIや動作への影響はない
+        - 既存の公開APIや動作の変更が必要
+        - 不明
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 実装への協力
+      options:
+        - label: 方針が合意できれば、Pull Requestの作成を検討できます。
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: 補足
+      description: 参考資料、図、関連Issueなどがあれば記載してください。

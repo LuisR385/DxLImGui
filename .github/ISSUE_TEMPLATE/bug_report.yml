@@ -1,0 +1,131 @@
+name: バグ報告
+description: DxLImGuiで再現する不具合を報告します
+title: "[Bug]: "
+labels: []
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        バグ報告ありがとうございます。再現と調査に必要な情報を、分かる範囲で記入してください。
+
+        セキュリティ上の脆弱性に関する情報は公開Issueへ記載せず、[Security Policy](https://github.com/LuisR385/DxLImGui/security/policy)に従って報告してください。
+
+  - type: checkboxes
+    id: preliminary_checks
+    attributes:
+      label: 事前確認
+      options:
+        - label: 同じ内容のIssueがないことを確認しました。
+          required: true
+        - label: READMEの「制限事項」を確認しました。
+          required: true
+        - label: この報告に秘密情報、個人情報、脆弱性の詳細を含めていません。
+          required: true
+
+  - type: input
+    id: dxlimgui_version
+    attributes:
+      label: DxLImGuiのバージョン
+      description: Releaseのバージョン、または使用したコミットを記載してください。
+      placeholder: v0.1.0 またはコミットSHA
+    validations:
+      required: true
+
+  - type: dropdown
+    id: distribution
+    attributes:
+      label: 入手方法
+      options:
+        - GitHub Release ZIP
+        - GitHubリポジトリ
+        - その他
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 実行環境
+      description: 不明な項目は「不明」と記載してください。
+      value: |
+        - Windows:
+        - Visual Studio / MSVC:
+        - Platform: x64
+        - Configuration: Debug / Release
+        - DxLib:
+        - Dear ImGui:
+        - ランタイムライブラリ:
+        - GPU:
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected_area
+    attributes:
+      label: 関連する機能
+      options:
+        - 初期化・終了処理
+        - フレーム処理
+        - Image
+        - RenderTarget
+        - Advanced API
+        - Win32 / DirectX 11バックエンド
+        - ビルド・導入
+        - サンプル
+        - その他
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual_behavior
+    attributes:
+      label: 発生した問題
+      description: 実際に起きたことと、エラーメッセージがある場合はその概要を記載してください。
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: 再現手順
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: 期待する動作
+      description: 本来どのように動作すると考えていたかを記載してください。
+    validations:
+      required: true
+
+  - type: textarea
+    id: minimal_code
+    attributes:
+      label: 最小再現コード
+      description: 可能であれば、問題を再現できる最小限のコードを記載してください。
+      render: cpp
+
+  - type: textarea
+    id: safety_checks
+    attributes:
+      label: 安全性チェックの結果
+      description: READMEに記載されたチェックを実行した場合は、コマンドと結果を記載してください。未実施の場合は理由を記載してください。
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: ログ・スクリーンショット
+      description: 必要な部分だけを添付してください。秘密情報、個人情報、ローカル絶対パスは削除してください。
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: 補足
+      description: 回避策、発生頻度、以前は動作していたバージョンなど、追加情報があれば記載してください。
