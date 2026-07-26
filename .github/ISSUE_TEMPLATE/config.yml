@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: セキュリティ脆弱性の報告
+    url: https://github.com/LuisR385/DxLImGui/security/policy
+    about: 脆弱性の詳細は公開Issueへ書かず、Security Policyの手順で報告してください。
