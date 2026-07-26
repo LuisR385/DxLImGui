@@ -1,0 +1,25 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.VC.db
+*.VC.VC.opendb
+
+# Build outputs
+build/
+bin/
+obj/
+x64/
+Win32/
+Debug/
+Release/
+
+# Runtime-generated files
+Log.txt
+imgui.ini
+DxLImGuiGeneratedImage.png
+DxLImGuiCaptureImage.png
+DxLImGui_RenderTarget_Alpha_Check.png
+
+# Local-only files that are not redistributable
+local/
