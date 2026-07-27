@@ -76,8 +76,9 @@ APIの目安は次のとおりです。
 
 - Win32/x86、ARM64
 - clang-cl、MinGW、Visual Studio以外のビルド環境
-- DirectX 9、DirectX 12、OpenGL、Vulkan
+- DirectX 9, OpenGL(スマホ)
 - Windows以外のOS
+- Visual Studio 2022以外
 - 複数GPUやデバイスロスト後の自動復旧
 - 複数モニター間でDPIが異なるMulti-Viewport運用
 
