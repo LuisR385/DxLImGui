@@ -2898,4 +2898,88 @@ namespace DxLImGui
 
             
         }
+        void KeyMap::UpdateConsoleInputDxLImGui()
+        {
+            ImGuiIO& io = ImGui::GetIO();
+
+            int padNum = DxLib::GetJoypadNum(); //ローカルの個々のPCに接続されているコントローラーを取得する
+
+            int padState = GetJoypadInputState(DX_INPUT_PAD1); // PAD1(ローカル)の獲得
+
+
+            auto UpdateButtonEvent = [&](int dxButton, ImGuiKey imguikey)
+            {
+                if (padState & dxButton)
+                    io.AddKeyEvent(imguikey, (padState & dxButton) != 0);
+                else
+                    io.AddKeyEvent(imguikey, (padState & dxButton) != 0);
+            };
+
+            auto UpdateLeftStickEvent = [&](int inputType)
+                {
+                    if (padState != 0)
+                    {
+                        int x, y;
+                        DxLib::GetJoypadAnalogInput(&x, &y, padState);
+
+                        //dxlibの-1000~1000を0.f~1.fに正規化する(imgui側のため)
+
+                        float rx = (float)x / 1000.0f;
+                        float ry = (float)y / 1000.0f;
+
+                        const float DEADZONE = 0.1f;
+
+                        float rxVal = (rx < -DEADZONE) ? -rx : (rx > DEADZONE) ? rx : 0.0f;
+                        float ryVal = (ry < -DEADZONE) ? -ry : (ry > DEADZONE) ? ry : 0.0f;
+
+                        // 左右スティックの傾きをImGuiへ伝える
+                        io.AddKeyAnalogEvent(ImGuiKey_GamepadLStickLeft, rx < -DEADZONE, -rx);
+                        io.AddKeyAnalogEvent(ImGuiKey_GamepadLStickRight, rx > DEADZONE, rx);
+                        io.AddKeyAnalogEvent(ImGuiKey_GamepadLStickUp, ry < -DEADZONE, -ry);
+                        io.AddKeyAnalogEvent(ImGuiKey_GamepadLStickDown, ry > DEADZONE, ry);
+                    }
+                };
+
+
+            auto UpdateRightStickEvent = [&](int inputType)
+                {
+                    if (inputType != 0)
+                    {
+                        int x, y;
+                        DxLib::GetJoypadAnalogInputRight(&x, &y, inputType);
+
+                        //dxlibの-1000~1000を0.f~1.fに正規化する(imgui側のため)
+                        float lx = (float)x / 1000.0f;
+                        float ly = (float)y / 1000.0f;
+
+                        // NOTE : デッドゾーンはお好みで
+                        constexpr const float DEADZONE = 0.1f;
+
+                        float rxVal = (lx < -DEADZONE) ? -lx : (lx > DEADZONE) ? lx : 0.0f;
+                        float ryVal = (ly < -DEADZONE) ? -ly : (ly > DEADZONE) ? ly : 0.0f;
+
+
+                        // 左右スティックの傾きをImGuiへ伝える
+                        io.AddKeyAnalogEvent(ImGuiKey_GamepadRStickLeft, lx < -DEADZONE, -lx);
+                        io.AddKeyAnalogEvent(ImGuiKey_GamepadRStickRight, lx > DEADZONE, lx);
+                        io.AddKeyAnalogEvent(ImGuiKey_GamepadRStickUp, ly < -DEADZONE, -ly);
+                        io.AddKeyAnalogEvent(ImGuiKey_GamepadRStickDown, ly > DEADZONE, ly);
+                    }
+                };
+
+
+
+            if (io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad
+                && padNum > 0 /*1個以上でもコントローラーが接続されているなら*/)
+            {
+                //TODO : lamda UpdateButtonEventの使用をする
+
+
+                
+            }
+            else
+            {
+               //NOTE : なにもしないとおもう
+            }
+        }
 }
