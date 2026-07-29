@@ -1,0 +1,24 @@
+{
+
+  "languages": {
+    "C++": {
+      "language_servers": ["clangd"],
+      "completions": {
+        "lsp": true,
+        "words": "fallback"
+      }
+    }
+  },
+  "lsp": {
+    "clangd": {
+      "binary": {
+        "arguments": [
+          "--background-index",
+          "--clang-tidy",
+          "--completion-style=detailed",
+          "--header-insertion=iwyu"
+        ]
+      }
+    }
+  }
+}

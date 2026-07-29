@@ -1,0 +1,6 @@
+
+If:
+  PathMatch: examples/(AdvancedExample|BasicExample|DemoForCapture|ImageExample|RenderTargetExample)\.cpp
+CompileFlags:
+  Add:
+    - /DDXLIMGUI_EXAMPLES_COMBINED_BUILD

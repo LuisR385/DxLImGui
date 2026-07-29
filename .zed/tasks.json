@@ -1,0 +1,32 @@
+[
+  {
+    "label": "MSVC: Build Debug x64",
+    "command": "cmd.exe",
+    "args": ["/d", "/c", "scripts\\build_msvc.bat", "Debug", "x64"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always"
+  },
+  {
+    "label": "MSVC: Build Release x64",
+    "command": "cmd.exe",
+    "args": ["/d", "/c", "scripts\\build_msvc.bat", "Release", "x64"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always"
+  },
+  {
+    "label": "MSVC: Clean Debug x64",
+    "command": "cmd.exe",
+    "args": ["/d", "/c", "scripts\\build_msvc.bat", "Debug", "x64", "Clean"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always"
+  },
+  {
+    "label": "Run Debug x64",
+    "command": "build\\x64\\Debug\\DxLImGui.exe",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "reveal": "always"
+  }
+]

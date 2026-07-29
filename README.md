@@ -110,6 +110,22 @@ Dear ImGui本体、Win32バックエンド、DirectX 11バックエンドを最�
 3. ソリューションをビルドします。
 4. 引数なしで起動するとBasicサンプルが動きます。
 
+### Zedで開発される方へ
+
+リポジトリのルートをZedで開くと、clangdによるC++17の補完が有効になります。
+VS2022、Visual Studio Installerの「C++によるデスクトップ開発」ワークロード、
+Windows SDKをインストールしたうえで、コマンドパレットの
+`task: spawn`から次のタスクを実行できます。
+
+- `MSVC: Build Debug x64`
+- `MSVC: Build Release x64`
+- `MSVC: Clean Debug x64`
+- `Run Debug x64`
+
+ビルドタスクはVS2022付属の`vswhere`でMSBuildとv143 C++ツールセットを
+自動検出するため、Developer Command PromptからZedを起動する必要はありません。
+補完に使用するclangdは、システムにない場合はZedが自動的に用意します。
+
 自分のプロジェクトへ組み込む場合は、少なくとも次を追加します。
 
 - `include/DxLImGui/DxLImGui.h`
