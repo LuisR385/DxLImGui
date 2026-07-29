@@ -53,7 +53,7 @@ namespace DxLImGui
 	//StylePreset列挙型
 	//ImGuiのウィジェットなどの色一式です
 	//カスタマイズされる場合はカスタマイズ
-	enum class StylePreset : std::size_t {
+	enum class StylePreset : std::size_t { //TODO : メモリを最大限に節約したいのでsize_t->uint_8tに移行する
 		Dark = 0,
 		Light = 1,
 		Classic = 2,
@@ -608,7 +608,7 @@ namespace DxLImGui
 
         void UpdateMouseInputDxLImGui();
 
-
+        void UpdateConsoleInputDxLImGui();
 	}
 
 
