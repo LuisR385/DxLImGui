@@ -2,19 +2,19 @@
 //
 // 										    DxLibとDear ImGuiをDirectX 11環境で接続し、
 //                                      初期化、フレーム処理、画像表示などを簡単に扱うためのライブラリです
-// 
+//
 //								NOTE: DxLImGuiConfigを使用するため、DxLImGuiを使用する際は
 //											必ずプロジェクト内に以下を含んでください
-// 
+//
 //										* include/DxLImGui/DxLImGuiConfig.h
 //										* include/DxLImGui/DxLImGui.h
 //										* src/DxLImGui.cpp
-// 
-// 
+//
+//
 //										Author : Kojima Ryoichi (@LuisR385)
 //										Created Date : 2026 / 07 / 16
 //											LICENSE : MIT LICENSE
-// 
+//
 //							WARNING : 今後 APIの名前空間のアクセスの仕方 / API名 / 挙動の変更の可能性があります。
 //
 // ---------------------------------------------------Design references----------------------------------------------------
@@ -23,7 +23,7 @@
 //                                     (raylib) Ramon Santamaria氏 / (rlImGui) Jeffery Myers氏
 //                                     raylibおよびrlImGuiの設計思想を参考にしています。
 // ----------------------------------------------------------------------------------------------------------------------
-// 
+//
 //                                          Copyright (c) 2026 Kojima Ryoichi
 //=======================================================================================================================
 
@@ -32,6 +32,7 @@
 #pragma once
 
 # include "DxLImGuiConfig.h"
+#include <type_traits>
 
 #define NOMINMAX	  // NOTE: 基本DxLImGuiではMIN,MAXマクロは使用しませんし、名前衝突を解決したいためです。必要なら消してください
 # include <Windows.h> // HWND, UINT, WPARAM, LPARAM
@@ -46,12 +47,8 @@
 #endif
 
 # include <imgui.h> //Dear ImGui
-
-# include <cstddef>
-# include <cstdint>
-# include <utility>
-
-namespace DxLImGui 
+# include <array>
+namespace DxLImGui
 {
 	//StylePreset列挙型
 	//ImGuiのウィジェットなどの色一式です
@@ -70,7 +67,7 @@ namespace DxLImGui
 		Gray = Classic,
 	};
 
-	
+
 	//DxLImGuiの初期化時に使用する構造体
 	struct DxLImGuiConfig
 	{
@@ -89,9 +86,9 @@ namespace DxLImGui
 		void (*styleCallback)(ImGuiStyle&) = nullptr;
 
 	};
-	
-	
-	
+
+
+
 	// DxLImGuiの画像キャッシュ登録だけを所有し、GraphHandleは所有しません。
 	// Resetまたはデストラクタの後も、GraphHandleの破棄は利用者が行います。
 	// 同じGraphHandleの登録を、ほかの所有者と同時に管理しないでください。
@@ -347,15 +344,15 @@ namespace DxLImGui
 
 
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
 	DXLIMGUI_API void ConfigureEnableDpiAwareness();
 	DXLIMGUI_API LRESULT WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -367,9 +364,9 @@ namespace DxLImGui
 	DXLIMGUI_API void ApplyFonts(const DxLImGuiConfig& config); //NOTE : v.0.1.0ではまだ未実装です。今後対応します
 	//DxLibを初期化する前に呼んでください
 	//NOTE : Windows環境のディスプレイ拡大率100%の場合は任意
-	//TESTED ENVIROMENT : 
+	//TESTED ENVIROMENT :
 	// Windows11 : x64
-	// resolution : 1920 x 1080 
+	// resolution : 1920 x 1080
 	// 倍率 : 100%
 	DXLIMGUI_API void SetupBeforeDxLibInit();
 
@@ -459,5 +456,160 @@ namespace DxLImGui
 		DXLIMGUI_API void RenderPlatformWindows();
 		DXLIMGUI_API void RestoreDxLibRenderingState();
 	}
+
+
+
+	//============================================================
+	// キーマッピング関連の型定義
+	//============================================================
+
+	namespace KeyMap
+	{
+        //TODO: DxLib入力APIを利用した独自キーボードバックエンドを検討する
+
+    	using DxLibKeyCode = int; //dxlibのAPI上の互換としてintを使用する方針
+
+
+        struct DxLImGuiKeyMapping
+        {
+            DxLibKeyCode dxlibKey;
+            ImGuiKey     imguiKey;
+        };
+
+        //DxLibとImGuiのショートカットキーやその他入力関係のバインディングを行うマップ(array)です
+        //コンパイル時に決まるように設定してあります
+        constexpr std::array dxlImGuiKeyMappings =
+        {
+            // アルファベットキー
+            DxLImGuiKeyMapping{ KEY_INPUT_A, ImGuiKey_A },
+            DxLImGuiKeyMapping{ KEY_INPUT_B, ImGuiKey_B },
+            DxLImGuiKeyMapping{ KEY_INPUT_C, ImGuiKey_C },
+            DxLImGuiKeyMapping{ KEY_INPUT_D, ImGuiKey_D },
+            DxLImGuiKeyMapping{ KEY_INPUT_E, ImGuiKey_E },
+            DxLImGuiKeyMapping{ KEY_INPUT_F, ImGuiKey_F },
+            DxLImGuiKeyMapping{ KEY_INPUT_G, ImGuiKey_G },
+            DxLImGuiKeyMapping{ KEY_INPUT_H, ImGuiKey_H },
+            DxLImGuiKeyMapping{ KEY_INPUT_I, ImGuiKey_I },
+            DxLImGuiKeyMapping{ KEY_INPUT_J, ImGuiKey_J },
+            DxLImGuiKeyMapping{ KEY_INPUT_K, ImGuiKey_K },
+            DxLImGuiKeyMapping{ KEY_INPUT_L, ImGuiKey_L },
+            DxLImGuiKeyMapping{ KEY_INPUT_M, ImGuiKey_M },
+            DxLImGuiKeyMapping{ KEY_INPUT_N, ImGuiKey_N },
+            DxLImGuiKeyMapping{ KEY_INPUT_O, ImGuiKey_O },
+            DxLImGuiKeyMapping{ KEY_INPUT_P, ImGuiKey_P },
+            DxLImGuiKeyMapping{ KEY_INPUT_Q, ImGuiKey_Q },
+            DxLImGuiKeyMapping{ KEY_INPUT_R, ImGuiKey_R },
+            DxLImGuiKeyMapping{ KEY_INPUT_S, ImGuiKey_S },
+            DxLImGuiKeyMapping{ KEY_INPUT_T, ImGuiKey_T },
+            DxLImGuiKeyMapping{ KEY_INPUT_U, ImGuiKey_U },
+            DxLImGuiKeyMapping{ KEY_INPUT_V, ImGuiKey_V },
+            DxLImGuiKeyMapping{ KEY_INPUT_W, ImGuiKey_W },
+            DxLImGuiKeyMapping{ KEY_INPUT_X, ImGuiKey_X },
+            DxLImGuiKeyMapping{ KEY_INPUT_Y, ImGuiKey_Y },
+            DxLImGuiKeyMapping{ KEY_INPUT_Z, ImGuiKey_Z },
+
+            // 数字キー
+            DxLImGuiKeyMapping{ KEY_INPUT_0, ImGuiKey_0 },
+            DxLImGuiKeyMapping{ KEY_INPUT_1, ImGuiKey_1 },
+            DxLImGuiKeyMapping{ KEY_INPUT_2, ImGuiKey_2 },
+            DxLImGuiKeyMapping{ KEY_INPUT_3, ImGuiKey_3 },
+            DxLImGuiKeyMapping{ KEY_INPUT_4, ImGuiKey_4 },
+            DxLImGuiKeyMapping{ KEY_INPUT_5, ImGuiKey_5 },
+            DxLImGuiKeyMapping{ KEY_INPUT_6, ImGuiKey_6 },
+            DxLImGuiKeyMapping{ KEY_INPUT_7, ImGuiKey_7 },
+            DxLImGuiKeyMapping{ KEY_INPUT_8, ImGuiKey_8 },
+            DxLImGuiKeyMapping{ KEY_INPUT_9, ImGuiKey_9 },
+
+            // ファンクションキー
+            DxLImGuiKeyMapping{ KEY_INPUT_F1, ImGuiKey_F1 },
+            DxLImGuiKeyMapping{ KEY_INPUT_F2, ImGuiKey_F2 },
+            DxLImGuiKeyMapping{ KEY_INPUT_F3, ImGuiKey_F3 },
+            DxLImGuiKeyMapping{ KEY_INPUT_F4, ImGuiKey_F4 },
+            DxLImGuiKeyMapping{ KEY_INPUT_F5, ImGuiKey_F5 },
+            DxLImGuiKeyMapping{ KEY_INPUT_F6, ImGuiKey_F6 },
+            DxLImGuiKeyMapping{ KEY_INPUT_F7, ImGuiKey_F7 },
+            DxLImGuiKeyMapping{ KEY_INPUT_F8, ImGuiKey_F8 },
+            DxLImGuiKeyMapping{ KEY_INPUT_F9, ImGuiKey_F9 },
+            DxLImGuiKeyMapping{ KEY_INPUT_F10, ImGuiKey_F10 },
+            DxLImGuiKeyMapping{ KEY_INPUT_F11, ImGuiKey_F11 },
+            DxLImGuiKeyMapping{ KEY_INPUT_F12, ImGuiKey_F12 },
+
+            // 方向キー・移動系
+            DxLImGuiKeyMapping{ KEY_INPUT_UP, ImGuiKey_UpArrow },
+            DxLImGuiKeyMapping{ KEY_INPUT_DOWN, ImGuiKey_DownArrow },
+            DxLImGuiKeyMapping{ KEY_INPUT_LEFT, ImGuiKey_LeftArrow },
+            DxLImGuiKeyMapping{ KEY_INPUT_RIGHT, ImGuiKey_RightArrow },
+            DxLImGuiKeyMapping{ KEY_INPUT_HOME, ImGuiKey_Home },
+            DxLImGuiKeyMapping{ KEY_INPUT_END, ImGuiKey_End },
+            DxLImGuiKeyMapping{ KEY_INPUT_PGUP, ImGuiKey_PageUp },
+            DxLImGuiKeyMapping{ KEY_INPUT_PGDN, ImGuiKey_PageDown },
+
+            // 編集・特殊キー
+            DxLImGuiKeyMapping{ KEY_INPUT_BACK, ImGuiKey_Backspace },
+            DxLImGuiKeyMapping{ KEY_INPUT_TAB, ImGuiKey_Tab },
+            DxLImGuiKeyMapping{ KEY_INPUT_RETURN, ImGuiKey_Enter },
+            DxLImGuiKeyMapping{ KEY_INPUT_ESCAPE, ImGuiKey_Escape },
+            DxLImGuiKeyMapping{ KEY_INPUT_SPACE, ImGuiKey_Space },
+            DxLImGuiKeyMapping{ KEY_INPUT_INSERT, ImGuiKey_Insert },
+            DxLImGuiKeyMapping{ KEY_INPUT_DELETE, ImGuiKey_Delete },
+            DxLImGuiKeyMapping{ KEY_INPUT_CAPSLOCK, ImGuiKey_CapsLock },
+            DxLImGuiKeyMapping{ KEY_INPUT_SCROLL, ImGuiKey_ScrollLock },
+            DxLImGuiKeyMapping{ KEY_INPUT_PAUSE, ImGuiKey_Pause },
+            DxLImGuiKeyMapping{ KEY_INPUT_SYSRQ, ImGuiKey_PrintScreen },
+
+            // 修飾キー
+            DxLImGuiKeyMapping{ KEY_INPUT_LSHIFT, ImGuiKey_LeftShift },
+            DxLImGuiKeyMapping{ KEY_INPUT_RSHIFT, ImGuiKey_RightShift },
+            DxLImGuiKeyMapping{ KEY_INPUT_LCONTROL, ImGuiKey_LeftCtrl },
+            DxLImGuiKeyMapping{ KEY_INPUT_RCONTROL, ImGuiKey_RightCtrl },
+            DxLImGuiKeyMapping{ KEY_INPUT_LALT, ImGuiKey_LeftAlt },
+            DxLImGuiKeyMapping{ KEY_INPUT_RALT, ImGuiKey_RightAlt },
+            DxLImGuiKeyMapping{ KEY_INPUT_LWIN, ImGuiKey_LeftSuper },
+            DxLImGuiKeyMapping{ KEY_INPUT_RWIN, ImGuiKey_RightSuper },
+            DxLImGuiKeyMapping{ KEY_INPUT_APPS, ImGuiKey_Menu },
+
+            // 記号キー
+            DxLImGuiKeyMapping{ KEY_INPUT_MINUS, ImGuiKey_Minus },
+            DxLImGuiKeyMapping{ KEY_INPUT_COMMA, ImGuiKey_Comma },
+            DxLImGuiKeyMapping{ KEY_INPUT_PERIOD, ImGuiKey_Period },
+            DxLImGuiKeyMapping{ KEY_INPUT_SLASH, ImGuiKey_Slash },
+            DxLImGuiKeyMapping{ KEY_INPUT_SEMICOLON, ImGuiKey_Semicolon },
+            DxLImGuiKeyMapping{ KEY_INPUT_LBRACKET, ImGuiKey_LeftBracket },
+            DxLImGuiKeyMapping{ KEY_INPUT_RBRACKET, ImGuiKey_RightBracket },
+            DxLImGuiKeyMapping{ KEY_INPUT_BACKSLASH, ImGuiKey_Backslash },
+
+            // テンキー
+            DxLImGuiKeyMapping{ KEY_INPUT_NUMLOCK, ImGuiKey_NumLock },
+            DxLImGuiKeyMapping{ KEY_INPUT_NUMPAD0, ImGuiKey_Keypad0 },
+            DxLImGuiKeyMapping{ KEY_INPUT_NUMPAD1, ImGuiKey_Keypad1 },
+            DxLImGuiKeyMapping{ KEY_INPUT_NUMPAD2, ImGuiKey_Keypad2 },
+            DxLImGuiKeyMapping{ KEY_INPUT_NUMPAD3, ImGuiKey_Keypad3 },
+            DxLImGuiKeyMapping{ KEY_INPUT_NUMPAD4, ImGuiKey_Keypad4 },
+            DxLImGuiKeyMapping{ KEY_INPUT_NUMPAD5, ImGuiKey_Keypad5 },
+            DxLImGuiKeyMapping{ KEY_INPUT_NUMPAD6, ImGuiKey_Keypad6 },
+            DxLImGuiKeyMapping{ KEY_INPUT_NUMPAD7, ImGuiKey_Keypad7 },
+            DxLImGuiKeyMapping{ KEY_INPUT_NUMPAD8, ImGuiKey_Keypad8 },
+            DxLImGuiKeyMapping{ KEY_INPUT_NUMPAD9, ImGuiKey_Keypad9 },
+            DxLImGuiKeyMapping{ KEY_INPUT_MULTIPLY, ImGuiKey_KeypadMultiply },
+            DxLImGuiKeyMapping{ KEY_INPUT_ADD, ImGuiKey_KeypadAdd },
+            DxLImGuiKeyMapping{ KEY_INPUT_SUBTRACT, ImGuiKey_KeypadSubtract },
+            DxLImGuiKeyMapping{ KEY_INPUT_DECIMAL, ImGuiKey_KeypadDecimal },
+            DxLImGuiKeyMapping{ KEY_INPUT_DIVIDE, ImGuiKey_KeypadDivide },
+            DxLImGuiKeyMapping{ KEY_INPUT_NUMPADENTER, ImGuiKey_KeypadEnter }
+        };
+
+        //前フレーム用の状態をリセット / 確認するために定義
+        inline std::array<bool, dxlImGuiKeyMappings.size()> previousKeyStates;
+
+        //DxLibとImGuiのキーマッピングの初期化
+        void InitializeKeyMappingsDxLImGui();
+         //キーマッピングを更新する
+        void UpdateKeyMappingsDxLImGui();
+
+        void UpdateMouseInputDxLImGui();
+
+
+	}
+
 
 } // namespace DxLImGui
