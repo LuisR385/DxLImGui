@@ -2841,35 +2841,42 @@ namespace DxLImGui
             //mouse
             if (!io.WantSetMousePos)
             {
-                int mouseX, mouseY;
-                DxLib::GetMousePoint(&mouseX, &mouseY);
                 io.AddMousePosEvent(
-                    static_cast<float>(mouseX),
-                    static_cast<float>(mouseY)
+                    static_cast<float>(io.MousePos.x),
+                    static_cast<float>(io.MousePos.y)
                 );
+            }
+            else
+            {
+                int mouseX = 0;
+                int mouseY = 0;
+
+                //0以外ならマウス座標の獲得イベントを送る
+                if (DxLib::GetMousePoint(&mouseX, &mouseY) == 0)
+                {
+                    io.AddMousePosEvent(
+                        static_cast<float>(mouseX),
+                        static_cast<float>(mouseY)
+                    );
+                }
+
+
             }
 
             //各マウスの入力されたイベントを吸収し、ImGui側に渡す
-            auto setMouseEvent = [&io](int DxLibInput, int ImGuiInput)
+            const int mouseInput = DxLib::GetMouseInput();
+
+            const auto addMouseButtonEvent =
+                [&io, mouseInput](int dxlibButton, int imguiButton)
                 {
-                    const auto checkmouseinput = DxLib::GetMouseInput();
-                    int mousePressCount = 0; //長押し判定に使用
-                    if ((checkmouseinput & DxLibInput) != 0)
-                    {
-                        mousePressCount++; //押されたら毎フレーム増加
-                        io.AddMouseButtonEvent(ImGuiInput, true); //押されっぱなしなのでずっとtrue 
-                    }
-                    else
-                    {
-                        mousePressCount = 0; //離されたらリセットする
-                        io.AddMouseButtonEvent(ImGuiInput, false); //離されっぱなしなのでずっとfalse    
-                    }
+                    const bool isPressed = (mouseInput & dxlibButton) != 0;
+                    io.AddMouseButtonEvent(imguiButton, isPressed);
                 };
 
 
-            const int MouseLeft = MOUSE_INPUT_LEFT || MOUSE_INPUT_1; //左クリック
-            const int MouseRight = (MOUSE_INPUT_RIGHT || MOUSE_INPUT_2); //右クリック
-            const int MouseMiddle = (MOUSE_INPUT_MIDDLE || MOUSE_INPUT_3); //ミドル(真ん中)クリック
+            const int MouseLeft = MOUSE_INPUT_LEFT; //左クリック
+            const int MouseRight = MOUSE_INPUT_RIGHT; //右クリック
+            const int MouseMiddle = MOUSE_INPUT_MIDDLE; //ミドル(真ん中)クリック
 
             //TODO : バインドするか検討(時間/新規実装へのメリットがあまりないため遠回し)
             /*
@@ -2883,15 +2890,15 @@ namespace DxLImGui
               */
 
             //主要なマウスの入力をバインド
-            setMouseEvent(MouseLeft, ImGuiKey_MouseLeft);
-            setMouseEvent(MouseRight, ImGuiKey_MouseRight);
-            setMouseEvent(MouseMiddle, ImGuiKey_MouseMiddle);
+            addMouseButtonEvent(MouseLeft, ImGuiKey_MouseLeft);
+            addMouseButtonEvent(MouseRight, ImGuiKey_MouseRight);
+            addMouseButtonEvent(MouseMiddle, ImGuiKey_MouseMiddle);
 
 
             //マウスホイールの取得 / バインド
             {
-                float mousewheelX = DxLib::GetMouseHWheelRotVolF();
-                float mousewheelY = DxLib::GetMouseWheelRotVolF();
+                const float mousewheelX = DxLib::GetMouseHWheelRotVolF();
+                const float mousewheelY = DxLib::GetMouseWheelRotVolF();
 
                 io.AddMouseWheelEvent(mousewheelX, mousewheelY);
             }
@@ -2907,63 +2914,152 @@ namespace DxLImGui
             int padState = GetJoypadInputState(DX_INPUT_PAD1); // PAD1(ローカル)の獲得
 
 
-            auto UpdateButtonEvent = [&](int dxButton, ImGuiKey imguikey)
+            auto UpdateButtonEvent = [&](int dxButton, ImGuiKey imguiKey)
             {
-                if (padState & dxButton)
-                    io.AddKeyEvent(imguikey, (padState & dxButton) != 0);
-                else
-                    io.AddKeyEvent(imguikey, (padState & dxButton) != 0);
+                    const bool isPressed = (padState & dxButton) != 0;
+                    io.AddKeyEvent(imguiKey, isPressed);
             };
 
-            auto UpdateLeftStickEvent = [&](int inputType)
+            auto UpdateLeftStickEvent = [&](ImGuiIO& io,int inputType)
                 {
                     if (padState != 0)
                     {
-                        int x, y;
-                        DxLib::GetJoypadAnalogInput(&x, &y, padState);
+                        int x = 0;
+                        int y = 0;
+
+                        if (DxLib::GetJoypadAnalogInput(&x, &y, inputType) != 0)
+                        {
+                            return;
+                        }
 
                         //dxlibの-1000~1000を0.f~1.fに正規化する(imgui側のため)
 
-                        float rx = (float)x / 1000.0f;
-                        float ry = (float)y / 1000.0f;
+                        constexpr float MaxAnalogValue = 1000.0f;
+                        constexpr float DeadZone = 0.1f;
 
-                        const float DEADZONE = 0.1f;
+                        const float normalizedX =
+                            std::clamp(
+                                static_cast<float>(x) / MaxAnalogValue,
+                                -1.0f,
+                                1.0f
+                            );
 
-                        float rxVal = (rx < -DEADZONE) ? -rx : (rx > DEADZONE) ? rx : 0.0f;
-                        float ryVal = (ry < -DEADZONE) ? -ry : (ry > DEADZONE) ? ry : 0.0f;
+                        const float normalizedY =
+                            std::clamp(
+                                static_cast<float>(y) / MaxAnalogValue,
+                                -1.0f,
+                                1.0f
+                            );
 
-                        // 左右スティックの傾きをImGuiへ伝える
-                        io.AddKeyAnalogEvent(ImGuiKey_GamepadLStickLeft, rx < -DEADZONE, -rx);
-                        io.AddKeyAnalogEvent(ImGuiKey_GamepadLStickRight, rx > DEADZONE, rx);
-                        io.AddKeyAnalogEvent(ImGuiKey_GamepadLStickUp, ry < -DEADZONE, -ry);
-                        io.AddKeyAnalogEvent(ImGuiKey_GamepadLStickDown, ry > DEADZONE, ry);
+                        const float leftValue =
+                            normalizedX < -DeadZone ? -normalizedX : 0.0f;
+
+                        const float rightValue =
+                            normalizedX > DeadZone ? normalizedX : 0.0f;
+
+                        const float upValue =
+                            normalizedY < -DeadZone ? -normalizedY : 0.0f;
+
+                        const float downValue =
+                            normalizedY > DeadZone ? normalizedY : 0.0f;
+
+                        // 左スティックの傾きをImGuiへ伝える
+                        io.AddKeyAnalogEvent(
+                            ImGuiKey_GamepadLStickLeft,
+                            leftValue > 0.0f,
+                            leftValue
+                        );
+
+                        io.AddKeyAnalogEvent(
+                            ImGuiKey_GamepadLStickRight,
+                            rightValue > 0.0f,
+                            rightValue
+                        );
+
+                        io.AddKeyAnalogEvent(
+                            ImGuiKey_GamepadLStickUp,
+                            upValue > 0.0f,
+                            upValue
+                        );
+
+                        io.AddKeyAnalogEvent(
+                            ImGuiKey_GamepadLStickDown,
+                            downValue > 0.0f,
+                            downValue
+                        );
                     }
                 };
 
-
-            auto UpdateRightStickEvent = [&](int inputType)
+            //右スティックイベントを送るラムダ式
+            auto UpdateRightStickEvent = [&](ImGuiIO& io,int inputType)
                 {
                     if (inputType != 0)
                     {
-                        int x, y;
-                        DxLib::GetJoypadAnalogInputRight(&x, &y, inputType);
+                        int x = 0;
+                        int y = 0;
+
+                        if (DxLib::GetJoypadAnalogInputRight(&x, &y, inputType) != 0)
+                        {
+                            return; 
+                        }
 
                         //dxlibの-1000~1000を0.f~1.fに正規化する(imgui側のため)
-                        float lx = (float)x / 1000.0f;
-                        float ly = (float)y / 1000.0f;
 
-                        // NOTE : デッドゾーンはお好みで
-                        constexpr const float DEADZONE = 0.1f;
+                        constexpr float MaxAnalogValue = 1000.0f;
+                        constexpr float DeadZone = 0.1f;
 
-                        float rxVal = (lx < -DEADZONE) ? -lx : (lx > DEADZONE) ? lx : 0.0f;
-                        float ryVal = (ly < -DEADZONE) ? -ly : (ly > DEADZONE) ? ly : 0.0f;
+                        const float normalizedX =
+                            std::clamp(
+                                static_cast<float>(x) / MaxAnalogValue,
+                                -1.0f,
+                                1.0f
+                            );
 
+                        const float normalizedY =
+                            std::clamp(
+                                static_cast<float>(y) / MaxAnalogValue,
+                                -1.0f,
+                                1.0f
+                            );
 
-                        // 左右スティックの傾きをImGuiへ伝える
-                        io.AddKeyAnalogEvent(ImGuiKey_GamepadRStickLeft, lx < -DEADZONE, -lx);
-                        io.AddKeyAnalogEvent(ImGuiKey_GamepadRStickRight, lx > DEADZONE, lx);
-                        io.AddKeyAnalogEvent(ImGuiKey_GamepadRStickUp, ly < -DEADZONE, -ly);
-                        io.AddKeyAnalogEvent(ImGuiKey_GamepadRStickDown, ly > DEADZONE, ly);
+                        //各スティックの総量
+
+                        const float leftValue =
+                            normalizedX < -DeadZone ? -normalizedX : 0.0f;
+
+                        const float rightValue =
+                            normalizedX > DeadZone ? normalizedX : 0.0f;
+
+                        const float upValue =
+                            normalizedY < -DeadZone ? -normalizedY : 0.0f;
+
+                        const float downValue =
+                            normalizedY > DeadZone ? normalizedY : 0.0f;
+
+                        // 左スティックの傾きをImGuiへ伝える
+                        io.AddKeyAnalogEvent(
+                            ImGuiKey_GamepadRStickLeft,
+                            leftValue > 0.0f,
+                            leftValue
+                        );
+
+                        io.AddKeyAnalogEvent(
+                            ImGuiKey_GamepadRStickRight,
+                            rightValue > 0.0f,
+                            rightValue
+                        );
+
+                        io.AddKeyAnalogEvent(
+                            ImGuiKey_GamepadRStickUp,
+                            upValue > 0.0f,
+                            upValue
+                        );
+
+                        io.AddKeyAnalogEvent(
+                            ImGuiKey_GamepadRStickDown,
+                            downValue > 0.0f,
+                            downValue
+                        );
                     }
                 };
 
