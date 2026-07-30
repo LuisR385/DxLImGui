@@ -1279,6 +1279,8 @@ namespace DxLImGui
 
         g_RuntimeState.dx11Initialized = true;
 
+        KeyMap::InitializeKeyMappingsDxLImGui();
+
         return true;
     }
 
@@ -1318,6 +1320,9 @@ namespace DxLImGui
         // 更新・描画できます。前フレームの二重実行防止状態をここで戻します。
         g_RuntimeState.platformWindowsUpdated = false;
         g_RuntimeState.platformWindowsRendered = false;
+
+        DxLImGui::KeyMap::UpdateKeyMappingsDxLImGui();
+        // DxLImGui::KeyMap::UpdateMouseInputDxLImGui();
 
         // DX11バックエンドは描画資源、Win32バックエンドは入力やウィンドウ
         // 情報を更新します。ImGui::NewFrame()はそれらを使用するため、
@@ -2770,7 +2775,7 @@ namespace DxLImGui
             previousKeyStates.fill(false);
         }
 
-        void UpdateKeyMappingsDxLImGui()
+        void KeyMap::UpdateKeyMappingsDxLImGui()
         {
             char KeyStateArrays[256];
 
@@ -2870,6 +2875,7 @@ namespace DxLImGui
                 [&io, mouseInput](int dxlibButton, int imguiButton)
                 {
                     const bool isPressed = (mouseInput & dxlibButton) != 0;
+                    if(!isPressed) return;
                     io.AddMouseButtonEvent(imguiButton, isPressed);
                 };
 
