@@ -92,6 +92,7 @@ Windows API、DxLib、D3D11、Dear ImGuiのWin32/DX11バックエンドへ直接
 | `include/DxLImGui/` | 利用側からインクルードする公開ヘッダ |
 | `src/` | DxLImGui本体の実装 |
 | `examples/` | サンプルと統合ランチャー |
+| `extras/` | 正式サポート外の参考実装、明示的に追加する補助コード |
 | `tests/` | 回帰・安全性チェック |
 | `thirdparty/DxLib/` | DxLibのヘッダと静的ライブラリ |
 | `thirdparty/imgui/` | Dear ImGui本体と利用バックエンド |
@@ -237,6 +238,57 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
    `DxLib_Init()`より前
 2. 各フレームは`BeginFrame()`から`EndFrame()`まで
 3. `Shutdown()`は`DxLib_End()`より前
+
+## 入力バックエンド
+
+キーボード・マウス入力は、Dear ImGui公式のWin32バックエンドを標準かつ
+推奨経路とします。既定値のまま使用すると、`WndProcHandler()`と
+`ImGui_ImplWin32_NewFrame()`が公式実装どおり入力、フォーカス、カーソル、
+DPI、ウィンドウ情報を処理します。DockingとMulti-Viewportを含む正式な
+サポート対象はこのWin32入力です。同梱の`imgui_impl_win32.h/.cpp`には
+DxLImGui独自の変更を加えていないため、互換性のあるDear ImGuiのupstream版や
+外部パッケージの公式Win32バックエンドも使用できます。
+
+```cpp
+DxLImGui::DxLImGuiConfig config;
+config.inputBackend = DxLImGui::InputBackend::Win32;
+```
+
+`Custom`は上級者向けで、DxLImGuiの正式サポート範囲外です。入力イベントだけを
+部分的に差し替えるモードではありません。Custom選択時は公式Win32バックエンドを
+初期化せず、`WndProcHandler()`も公式バックエンドへメッセージを転送しません。
+必須コールバックが`ImGui::NewFrame()`の直前に呼ばれ、利用者が
+`DisplaySize`、`DeltaTime`、フォーカス、テキスト、キーボード、マウス、
+ゲームパッドなど必要な`ImGuiIO`更新をすべて担当します。
+
+公式Win32バックエンドを使わないため、Customではカーソル形状、DPI、
+マウスキャプチャ、IME、プラットフォームウィンドウなどの公式機能を
+自動利用できません。`ViewportsEnable = true`との組み合わせ、および
+コールバック未指定は`Initialize()`がログを出して拒否します。
+
+```cpp
+void UpdateCustomInput(ImGuiIO& io)
+{
+    io.DisplaySize = /* current client size */;
+    io.DeltaTime = /* elapsed seconds */;
+    // io.AddKeyEvent(...);
+    // io.AddMousePosEvent(...);
+}
+
+DxLImGui::DxLImGuiConfig config;
+config.inputBackend = DxLImGui::InputBackend::Custom;
+config.customInputCallback = UpdateCustomInput;
+```
+
+従来のDxLibキーボード・マウス・ゲームパッド処理は、本体から
+[extras/dxlib_input](extras/dxlib_input/README.md)へ移しました。
+これはCustom用の参考実装で、DxLImGui本体にはビルドされず、
+`BeginFrame()`からも自動実行されません。使用する場合は
+`DxLibInput.cpp`を利用側プロジェクトへ明示的に追加してください。
+Win32モードからこの補助コードを呼ぶと入力イベントが混在するため非対応です。
+
+入力設定は`Initialize()`時に確定し、後から`ApplyConfig()`を呼んでも
+実行中の入力経路は変わりません。
 
 ## Image
 

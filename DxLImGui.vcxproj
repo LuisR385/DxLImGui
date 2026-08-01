@@ -153,6 +153,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="extras\dxlib_input\DxLibInput.cpp" />
     <ClCompile Include="src\DxLImGui.cpp" />
     <ClCompile Include="examples\AdvancedExample.cpp">
       <PreprocessorDefinitions>DXLIMGUI_EXAMPLES_COMBINED_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -182,6 +183,7 @@
     <ClCompile Include="thirdparty\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="extras\dxlib_input\DxLibInput.h" />
     <ClInclude Include="include\DxLImGui\DxLImGui.h" />
     <ClInclude Include="include\DxLImGui\DxLImGuiConfig.h" />
     <ClInclude Include="examples\Examples.h" />
