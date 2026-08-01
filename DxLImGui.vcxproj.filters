@@ -75,6 +75,9 @@
     <ClCompile Include="tests\RenderTargetChecks.cpp">
       <Filter>ソース ファイル\tests</Filter>
     </ClCompile>
+    <ClCompile Include="extras\dxlib_input\DxLibInput.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\DxLImGui\DxLImGui.h">
@@ -117,6 +120,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="thirdparty\imgui\imstb_truetype.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="extras\dxlib_input\DxLibInput.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

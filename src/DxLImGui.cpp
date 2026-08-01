@@ -136,6 +136,9 @@ namespace
         bool contextCreated = false;
         bool win32Initialized = false;
         bool dx11Initialized = false;
+        DxLImGui::InputBackend inputBackend =
+            DxLImGui::InputBackend::Win32;
+        DxLImGui::InputUpdateCallback customInputCallback = nullptr;
         FramePhase framePhase = FramePhase::Idle;
 
         // EndFrameとAdvanced APIが同じフレームを二重処理しないための印です。
@@ -1042,6 +1045,64 @@ namespace
             io.ConfigFlags &= ~flag;
         }
     }
+
+    bool IsKnownInputBackend(
+        DxLImGui::InputBackend inputBackend
+    ) noexcept
+    {
+        switch (inputBackend)
+        {
+        case DxLImGui::InputBackend::Win32:
+        case DxLImGui::InputBackend::Custom:
+            return true;
+
+        default:
+            return false;
+        }
+    }
+
+    bool ValidateInputConfig(
+        const DxLImGui::DxLImGuiConfig& config
+    )
+    {
+        if (!IsKnownInputBackend(config.inputBackend))
+        {
+            DxLib::LogFileAdd(
+                "[DxLImGui] Initialize rejected: unknown InputBackend.\n"
+            );
+            return false;
+        }
+
+        if (
+            config.inputBackend ==
+                DxLImGui::InputBackend::Custom &&
+            config.ViewportsEnable
+        )
+        {
+            DxLib::LogFileAdd(
+                "[DxLImGui] Initialize rejected: Custom input does not "
+                "initialize the Win32 platform backend and cannot use "
+                "Multi-Viewport. Use InputBackend::Win32 or "
+                "disable ViewportsEnable.\n"
+            );
+            return false;
+        }
+
+        if (
+            config.inputBackend ==
+                DxLImGui::InputBackend::Custom &&
+            config.customInputCallback == nullptr
+        )
+        {
+            DxLib::LogFileAdd(
+                "[DxLImGui] Initialize rejected: Custom input requires "
+                "customInputCallback.\n"
+            );
+            return false;
+        }
+
+        return true;
+    }
 }
 
 
@@ -1054,7 +1115,10 @@ namespace DxLImGui
     LRESULT WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         if (
             !g_RuntimeState.contextCreated ||
-            g_RuntimeState.context == nullptr
+            g_RuntimeState.context == nullptr ||
+            g_RuntimeState.inputBackend !=
+                InputBackend::Win32 ||
+            !g_RuntimeState.win32Initialized
         )
         {
             return 0;
@@ -1104,6 +1168,18 @@ namespace DxLImGui
     void ApplyConfigFlags(const DxLImGuiConfig& config) {
 
         ImGuiIO& io = ImGui::GetIO();
+        const bool customInputIsActive =
+            g_RuntimeState.contextCreated &&
+            g_RuntimeState.inputBackend ==
+                InputBackend::Custom;
+
+        if (customInputIsActive && config.ViewportsEnable)
+        {
+            DxLib::LogFileAdd(
+                "[DxLImGui] ViewportsEnable ignored: Custom input does "
+                "not initialize the Win32 platform backend.\n"
+            );
+        }
 
         SetConfigFlag(
             io,
@@ -1120,7 +1196,8 @@ namespace DxLImGui
         SetConfigFlag(
             io,
             ImGuiConfigFlags_ViewportsEnable,
-            config.ViewportsEnable
+            config.ViewportsEnable &&
+                !customInputIsActive
         );
 
         SetConfigFlag(
@@ -1172,8 +1249,9 @@ namespace DxLImGui
         DXLIMGUI_UNUSED(config);
     }
 
-    // DxLibが用意したウィンドウとDirectX 11デバイスを、Dear ImGuiの
-    // Win32/DX11バックエンドへ接続します。DxLib初期化後に呼ぶ必要があります。
+    // DxLibが用意したDirectX 11デバイスをDear ImGuiへ接続します。
+    // 標準モードだけ公式Win32バックエンドも初期化します。
+    // DxLib初期化後に呼ぶ必要があります。
     bool Initialize(const DxLImGuiConfig& config) {
 
         // 二重初期化は同じバックエンド資源やImGuiContextを複数回
@@ -1187,6 +1265,11 @@ namespace DxLImGui
         // DxLImGui側から判断できません。取り込まずに失敗させることで、
         // 他者のImGuiContextを初期化・破棄する事故を防ぎます。
         if (ImGui::GetCurrentContext() != nullptr)
+        {
+            return false;
+        }
+
+        if (!ValidateInputConfig(config))
         {
             return false;
         }
@@ -1230,6 +1313,9 @@ namespace DxLImGui
         // Contextの同一性をポインタ比較する場合にだけ使用します。
         g_RuntimeState.context = createdContext;
         g_RuntimeState.contextCreated = true;
+        g_RuntimeState.inputBackend = config.inputBackend;
+        g_RuntimeState.customInputCallback =
+            config.customInputCallback;
 
         // Configが取れるかTRY CATCH方式を利用する
         // NOTE :今後ApplyConfigをbool APIにして
@@ -1246,21 +1332,28 @@ namespace DxLImGui
             throw;
         }
 
-        if (!ImGui_ImplWin32_Init(windowhandle)) {
-            if (
-                ImGui::GetIO().BackendPlatformUserData !=
-                nullptr
-            )
+        // 標準モードではDear ImGui公式Win32バックエンドを無改造で
+        // 初期化します。Customモードは入力だけを部分的に差し替えず、
+        // プラットフォームバックエンド全体を利用者側へ委ねます。
+        if (config.inputBackend == InputBackend::Win32)
+        {
+            if (!ImGui_ImplWin32_Init(windowhandle))
             {
-                ImGui_ImplWin32_Shutdown();
+                if (
+                    ImGui::GetIO().BackendPlatformUserData !=
+                    nullptr
+                )
+                {
+                    ImGui_ImplWin32_Shutdown();
+                }
+
+                ImGui::DestroyContext(createdContext);
+                g_RuntimeState = {};
+                return false;
             }
 
-            ImGui::DestroyContext(createdContext);
-            g_RuntimeState = {};
-            return false;
+            g_RuntimeState.win32Initialized = true;
         }
-
-        g_RuntimeState.win32Initialized = true;
 
         if (!ImGui_ImplDX11_Init(device, context)) {
             if (
@@ -1271,15 +1364,16 @@ namespace DxLImGui
                 ImGui_ImplDX11_Shutdown();
             }
 
-            ImGui_ImplWin32_Shutdown(); //先に終了処理をする
+            if (g_RuntimeState.win32Initialized)
+            {
+                ImGui_ImplWin32_Shutdown();
+            }
             ImGui::DestroyContext(createdContext);
             g_RuntimeState = {};
             return false;
         }
 
         g_RuntimeState.dx11Initialized = true;
-
-        KeyMap::InitializeKeyMappingsDxLImGui();
 
         return true;
     }
@@ -1291,10 +1385,14 @@ namespace DxLImGui
 
         DXLIMGUI_ASSERT(g_RuntimeState.contextCreated);
         DXLIMGUI_ASSERT(g_RuntimeState.dx11Initialized);
-        DXLIMGUI_ASSERT(g_RuntimeState.win32Initialized);
+        DXLIMGUI_ASSERT(
+            g_RuntimeState.inputBackend !=
+                InputBackend::Win32 ||
+            g_RuntimeState.win32Initialized
+        );
 
         // Building中の再呼び出しは、前のフレームを閉じずにNewFrameを
-        // 重ねる誤りです。Dear ImGuiと両バックエンドの状態を守るため、
+        // 重ねる誤りです。Dear ImGuiと有効なバックエンドの状態を守るため、
         // Debugではここで呼び出し順を検出します。
         DXLIMGUI_ASSERT(
             g_RuntimeState.framePhase !=
@@ -1304,8 +1402,12 @@ namespace DxLImGui
 
         //いずれかが初期化 / 呼び出されていない場合はなにもしない
         if (!g_RuntimeState.contextCreated ||
-            !g_RuntimeState.win32Initialized ||
             !g_RuntimeState.dx11Initialized ||
+            (
+                g_RuntimeState.inputBackend ==
+                    InputBackend::Win32 &&
+                !g_RuntimeState.win32Initialized
+            ) ||
             g_RuntimeState.framePhase == FramePhase::Building)
         {
             return;
@@ -1321,14 +1423,31 @@ namespace DxLImGui
         g_RuntimeState.platformWindowsUpdated = false;
         g_RuntimeState.platformWindowsRendered = false;
 
-        DxLImGui::KeyMap::UpdateKeyMappingsDxLImGui();
-        // DxLImGui::KeyMap::UpdateMouseInputDxLImGui();
-
-        // DX11バックエンドは描画資源、Win32バックエンドは入力やウィンドウ
-        // 情報を更新します。ImGui::NewFrame()はそれらを使用するため、
-        // Dear ImGui本体のNewFrameより先に両バックエンドを更新します。
+        // DX11バックエンドは両モードで描画資源を更新します。
         ImGui_ImplDX11_NewFrame();
-        ImGui_ImplWin32_NewFrame();
+
+        switch (g_RuntimeState.inputBackend)
+        {
+        case InputBackend::Win32:
+            // 標準経路は公式Win32バックエンドをそのまま呼び出します。
+            // 入力、フォーカス、カーソル、DPI、Multi-Viewportを
+            // 公式実装へ一括して委ね、部分的な差し替えは行いません。
+            ImGui_ImplWin32_NewFrame();
+            break;
+
+        case InputBackend::Custom:
+            // CustomではWin32バックエンドを初期化していないため、
+            // 必須コールバックがプラットフォーム更新と入力を担当します。
+            g_RuntimeState.customInputCallback(
+                ImGui::GetIO()
+            );
+            break;
+
+        default:
+            DXLIMGUI_ASSERT(false);
+            break;
+        }
+
         ImGui::NewFrame();
 
         const ImGuiIO& io = ImGui::GetIO();
@@ -2769,319 +2888,4 @@ namespace DxLImGui
         }
 
 
-        void KeyMap::InitializeKeyMappingsDxLImGui()
-        {
-            // previousKeyStates.fill(false); // 全てのキーを未押下状態に初期化
-            previousKeyStates.fill(false);
-        }
-
-        void KeyMap::UpdateKeyMappingsDxLImGui()
-        {
-            char KeyStateArrays[256];
-
-            //押されていないならなにもしない
-            if (DxLib::GetHitKeyStateAll(KeyStateArrays) != 0)
-            {
-                return;
-            }
-
-            ImGuiIO& io = ImGui::GetIO();
-
-
-            for (std::size_t keyItr = 0; keyItr < KeyMap::dxlImGuiKeyMappings.size(); keyItr++)
-            {
-                const auto& mappings = KeyMap::dxlImGuiKeyMappings[keyItr];
-
-                const auto KeyIndex = static_cast<std::size_t>(mappings.dxlibKey);
-
-                //KeyIndexがKeyStateArraysの配列よりも大きいなら
-                if (KeyIndex >= std::size(KeyStateArrays))
-                {
-                    continue;
-                }
-
-                
-                //その要素内に押されたものがあるかどうか
-                const bool IsPressed = KeyStateArrays[KeyIndex] != 0;
-
-                if (IsPressed != KeyMap::previousKeyStates[keyItr])
-                {
-                    io.AddKeyEvent(mappings.imguiKey, IsPressed);
-                    KeyMap::previousKeyStates[keyItr] = IsPressed;
-                }
-            }
-
-           //ショートカット判定
-           //TODO : 内部APIで隠し、リファクタリングを検討する
-
-            const bool ctrl =
-                KeyStateArrays[KEY_INPUT_LCONTROL] != 0 ||
-                KeyStateArrays[KEY_INPUT_RCONTROL] != 0;
-
-            const bool shift =
-                KeyStateArrays[KEY_INPUT_LSHIFT] != 0 ||
-                KeyStateArrays[KEY_INPUT_RSHIFT] != 0;
-
-            const bool alt =
-                KeyStateArrays[KEY_INPUT_LALT] != 0 ||
-                KeyStateArrays[KEY_INPUT_RALT] != 0;
-
-            const bool super =
-                KeyStateArrays[KEY_INPUT_LWIN] != 0 ||
-                KeyStateArrays[KEY_INPUT_RWIN] != 0;
-
-            io.AddKeyEvent(ImGuiMod_Ctrl, ctrl);
-            io.AddKeyEvent(ImGuiMod_Shift, shift);
-            io.AddKeyEvent(ImGuiMod_Alt, alt);
-            io.AddKeyEvent(ImGuiMod_Super, super);
-            
-
-
-        }
-       //マウスの入力関係を更新するメソッド
-        void KeyMap::UpdateMouseInputDxLImGui()
-        {
-            ImGuiIO& io = ImGui::GetIO();
-
-            //mouse
-            if (!io.WantSetMousePos)
-            {
-                io.AddMousePosEvent(
-                    static_cast<float>(io.MousePos.x),
-                    static_cast<float>(io.MousePos.y)
-                );
-            }
-            else
-            {
-                int mouseX = 0;
-                int mouseY = 0;
-
-                //0以外ならマウス座標の獲得イベントを送る
-                if (DxLib::GetMousePoint(&mouseX, &mouseY) == 0)
-                {
-                    io.AddMousePosEvent(
-                        static_cast<float>(mouseX),
-                        static_cast<float>(mouseY)
-                    );
-                }
-
-
-            }
-
-            //各マウスの入力されたイベントを吸収し、ImGui側に渡す
-            const int mouseInput = DxLib::GetMouseInput();
-
-            const auto addMouseButtonEvent =
-                [&io, mouseInput](int dxlibButton, int imguiButton)
-                {
-                    const bool isPressed = (mouseInput & dxlibButton) != 0;
-                    if(!isPressed) return;
-                    io.AddMouseButtonEvent(imguiButton, isPressed);
-                };
-
-
-            const int MouseLeft = MOUSE_INPUT_LEFT; //左クリック
-            const int MouseRight = MOUSE_INPUT_RIGHT; //右クリック
-            const int MouseMiddle = MOUSE_INPUT_MIDDLE; //ミドル(真ん中)クリック
-
-            //TODO : バインドするか検討(時間/新規実装へのメリットがあまりないため遠回し)
-            /*
-
-                const int MouseSideButton4 = MOUSE_INPUT_4;
-                const int MouseSideButton5 = MOUSE_INPUT_5;
-                const int MouseSideButton6 = MOUSE_INPUT_6;
-                const int MouseSideButton7 = MOUSE_INPUT_7;
-                const int MouseSideButton8 = MOUSE_INPUT_8;
-            
-              */
-
-            //主要なマウスの入力をバインド
-            addMouseButtonEvent(MouseLeft, ImGuiKey_MouseLeft);
-            addMouseButtonEvent(MouseRight, ImGuiKey_MouseRight);
-            addMouseButtonEvent(MouseMiddle, ImGuiKey_MouseMiddle);
-
-
-            //マウスホイールの取得 / バインド
-            {
-                const float mousewheelX = DxLib::GetMouseHWheelRotVolF();
-                const float mousewheelY = DxLib::GetMouseWheelRotVolF();
-
-                io.AddMouseWheelEvent(mousewheelX, mousewheelY);
-            }
-
-            
-        }
-        void KeyMap::UpdateConsoleInputDxLImGui()
-        {
-            ImGuiIO& io = ImGui::GetIO();
-
-            int padNum = DxLib::GetJoypadNum(); //ローカルの個々のPCに接続されているコントローラーを取得する
-
-            int padState = GetJoypadInputState(DX_INPUT_PAD1); // PAD1(ローカル)の獲得
-
-
-            auto UpdateButtonEvent = [&](int dxButton, ImGuiKey imguiKey)
-            {
-                    const bool isPressed = (padState & dxButton) != 0;
-                    io.AddKeyEvent(imguiKey, isPressed);
-            };
-
-            auto UpdateLeftStickEvent = [&](ImGuiIO& io,int inputType)
-                {
-                    if (padState != 0)
-                    {
-                        int x = 0;
-                        int y = 0;
-
-                        if (DxLib::GetJoypadAnalogInput(&x, &y, inputType) != 0)
-                        {
-                            return;
-                        }
-
-                        //dxlibの-1000~1000を0.f~1.fに正規化する(imgui側のため)
-
-                        constexpr float MaxAnalogValue = 1000.0f;
-                        constexpr float DeadZone = 0.1f;
-
-                        const float normalizedX =
-                            std::clamp(
-                                static_cast<float>(x) / MaxAnalogValue,
-                                -1.0f,
-                                1.0f
-                            );
-
-                        const float normalizedY =
-                            std::clamp(
-                                static_cast<float>(y) / MaxAnalogValue,
-                                -1.0f,
-                                1.0f
-                            );
-
-                        const float leftValue =
-                            normalizedX < -DeadZone ? -normalizedX : 0.0f;
-
-                        const float rightValue =
-                            normalizedX > DeadZone ? normalizedX : 0.0f;
-
-                        const float upValue =
-                            normalizedY < -DeadZone ? -normalizedY : 0.0f;
-
-                        const float downValue =
-                            normalizedY > DeadZone ? normalizedY : 0.0f;
-
-                        // 左スティックの傾きをImGuiへ伝える
-                        io.AddKeyAnalogEvent(
-                            ImGuiKey_GamepadLStickLeft,
-                            leftValue > 0.0f,
-                            leftValue
-                        );
-
-                        io.AddKeyAnalogEvent(
-                            ImGuiKey_GamepadLStickRight,
-                            rightValue > 0.0f,
-                            rightValue
-                        );
-
-                        io.AddKeyAnalogEvent(
-                            ImGuiKey_GamepadLStickUp,
-                            upValue > 0.0f,
-                            upValue
-                        );
-
-                        io.AddKeyAnalogEvent(
-                            ImGuiKey_GamepadLStickDown,
-                            downValue > 0.0f,
-                            downValue
-                        );
-                    }
-                };
-
-            //右スティックイベントを送るラムダ式
-            auto UpdateRightStickEvent = [&](ImGuiIO& io,int inputType)
-                {
-                    if (inputType != 0)
-                    {
-                        int x = 0;
-                        int y = 0;
-
-                        if (DxLib::GetJoypadAnalogInputRight(&x, &y, inputType) != 0)
-                        {
-                            return; 
-                        }
-
-                        //dxlibの-1000~1000を0.f~1.fに正規化する(imgui側のため)
-
-                        constexpr float MaxAnalogValue = 1000.0f;
-                        constexpr float DeadZone = 0.1f;
-
-                        const float normalizedX =
-                            std::clamp(
-                                static_cast<float>(x) / MaxAnalogValue,
-                                -1.0f,
-                                1.0f
-                            );
-
-                        const float normalizedY =
-                            std::clamp(
-                                static_cast<float>(y) / MaxAnalogValue,
-                                -1.0f,
-                                1.0f
-                            );
-
-                        //各スティックの総量
-
-                        const float leftValue =
-                            normalizedX < -DeadZone ? -normalizedX : 0.0f;
-
-                        const float rightValue =
-                            normalizedX > DeadZone ? normalizedX : 0.0f;
-
-                        const float upValue =
-                            normalizedY < -DeadZone ? -normalizedY : 0.0f;
-
-                        const float downValue =
-                            normalizedY > DeadZone ? normalizedY : 0.0f;
-
-                        // 左スティックの傾きをImGuiへ伝える
-                        io.AddKeyAnalogEvent(
-                            ImGuiKey_GamepadRStickLeft,
-                            leftValue > 0.0f,
-                            leftValue
-                        );
-
-                        io.AddKeyAnalogEvent(
-                            ImGuiKey_GamepadRStickRight,
-                            rightValue > 0.0f,
-                            rightValue
-                        );
-
-                        io.AddKeyAnalogEvent(
-                            ImGuiKey_GamepadRStickUp,
-                            upValue > 0.0f,
-                            upValue
-                        );
-
-                        io.AddKeyAnalogEvent(
-                            ImGuiKey_GamepadRStickDown,
-                            downValue > 0.0f,
-                            downValue
-                        );
-                    }
-                };
-
-
-
-            if (io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad
-                && padNum > 0 /*1個以上でもコントローラーが接続されているなら*/)
-            {
-                //TODO : lamda UpdateButtonEventの使用をする
-
-
-                
-            }
-            else
-            {
-               //NOTE : なにもしないとおもう
-            }
-        }
 }
