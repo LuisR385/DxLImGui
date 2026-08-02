@@ -443,6 +443,8 @@ namespace DxLImGui
 	DXLIMGUI_API void ClearImageCache();
 
 
+    //TODO : オーバーロードAPIまたは引数の変更を検討する
+    
 	//読み込み
 	DXLIMGUI_NODISCARD
 	DXLIMGUI_API Image LoadImageFromFile(const char* path);
