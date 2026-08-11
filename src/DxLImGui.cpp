@@ -1973,6 +1973,18 @@ namespace DxLImGui
 
     }
 
+    RenderTarget CreateRenderTarget(int width, int height, bool alpha)
+    {
+        RenderTarget rt(width, height, alpha);
+
+        if (!rt)
+        {
+            DXLIMGUI_ASSERT(rt);
+            return rt;
+        }
+        return rt;
+    }
+
     bool DrawImage(const Image& image) {
         return image.Draw();
     }

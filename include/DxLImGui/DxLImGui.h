@@ -449,6 +449,9 @@ namespace DxLImGui
 	DXLIMGUI_NODISCARD
 	DXLIMGUI_API Image LoadImageFromFile(const char* path);
 
+    DXLIMGUI_NODISCARD
+        DXLIMGUI_API RenderTarget CreateRenderTarget(int width, int height, bool alpha = true);
+
 	//高レベルAPI : Image用
 
 	// BeginFrame()の後、EndFrame()の前、かつ
