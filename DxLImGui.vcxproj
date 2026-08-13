@@ -185,7 +185,6 @@
   <ItemGroup>
     <ClInclude Include="extras\dxlib_input\DxLibInput.h" />
     <ClInclude Include="include\DxLImGui\DxLImGui.h" />
-    <ClInclude Include="include\DxLImGui\DxLImGuiConfig.h" />
     <ClInclude Include="examples\Examples.h" />
     <ClInclude Include="tests\MakeScreenSrvCheck.h" />
     <ClInclude Include="tests\RenderTargetChecks.h" />
