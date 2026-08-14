@@ -127,26 +127,63 @@ Windows SDKをインストールしたうえで、コマンドパレットの
 自動検出するため、Developer Command PromptからZedを起動する必要はありません。
 補完に使用するclangdは、システムにない場合はZedが自動的に用意します。
 
-自分のプロジェクトへ組み込む場合は、少なくとも次を追加します。
+## 組み込み方法
 
-- `include/DxLImGui/DxLImGui.h`
-- `include/DxLImGui/DxLImGuiConfig.h`
-- `src/DxLImGui.cpp`
-- Dear ImGui本体
-  - `imgui.cpp`
-  - `imgui_draw.cpp`
-  - `imgui_tables.cpp`
-  - `imgui_widgets.cpp`
-- Dear ImGuiバックエンド
-  - `imgui_impl_win32.cpp`
-  - `imgui_impl_dx11.cpp`
-- DxLibのインクルードパス、ライブラリパス、利用構成に合う`.lib`
+DxLImGuiの公開ヘッダーは`include/DxLImGui/DxLImGui.h`の1ファイルです。
+設定用の別ヘッダーはありません。どの方式でも利用側は次のようにインクルードします。
 
-インクルードパスには`include`、DxLib、Dear ImGui本体、`backends`を追加してください。
-ランタイムライブラリ（`/MT`、`/MTd`など）とDxLibのライブラリ種類も一致させます。
+```cpp
+#include <DxLImGui/DxLImGui.h>
+```
 
-新規コードでは`#include <DxLImGui/DxLImGui.h>`を使用してください。
-公開ヘッダの実体は`include/DxLImGui/DxLImGui.h`です。
+共通の依存関係としてDear ImGui本体、`imgui_impl_win32`、
+`imgui_impl_dx11`、DxLibが必要です。インクルードパスには`include`、
+DxLib、Dear ImGui本体、`backends`を追加してください。ランタイムライブラリ
+（`/MT`、`/MTd`など）とDxLibのライブラリ種類も一致させます。
+
+### シングルヘッダーとして使用する
+
+実装を置く1つのCPPファイルだけで、インクルードより前に
+`DXLIMGUI_IMPLEMENTATION`を定義します。
+
+```cpp
+#define DXLIMGUI_IMPLEMENTATION
+#include <DxLImGui/DxLImGui.h>
+```
+
+`DXLIMGUI_IMPLEMENTATION`を複数の翻訳単位で定義すると実装が重複するため、
+必ず1か所だけで定義してください。Dear ImGuiのソースとDxLibのライブラリは、
+この方式でも別途コンパイル／リンクする必要があります。
+
+### ヘッダーとCPPを直接コンパイルする
+
+マクロを定義せず、`include/DxLImGui/DxLImGui.h`と
+`src/DxLImGui.cpp`をプロジェクトへ追加します。`DxLImGui.cpp`は内部で
+`DXLIMGUI_IMPLEMENTATION`を定義する薄い互換用ソースです。さらに次の
+Dear ImGuiソースを同じプロジェクトでコンパイルします。
+
+- `imgui.cpp`
+- `imgui_draw.cpp`
+- `imgui_tables.cpp`
+- `imgui_widgets.cpp`
+- `imgui_impl_win32.cpp`
+- `imgui_impl_dx11.cpp`
+
+### 静的ライブラリとして使用する
+
+静的ライブラリを作成する側と利用する側の両方で`DXLIMGUI_STATIC`を定義します。
+作成側では`src/DxLImGui.cpp`を静的ライブラリへ含め、利用側では生成した`.lib`と
+共通の依存ライブラリをリンクします。
+
+### DLLとして使用する
+
+DLLを作成するプロジェクトでは`DXLIMGUI_BUILD_DLL`、DLLを利用するプロジェクトでは
+`DXLIMGUI_USE_DLL`を定義します。これにより公開APIがそれぞれ`dllexport`、
+`dllimport`になります。2つのマクロは同時に定義できません。
+
+Dear ImGuiとDxLibは内部状態を持つため、DLL側と実行ファイル側へ別々の静的コピーを
+組み込まないでください。両側から同じDear ImGui／DxLibの実体を共有できない構成では、
+静的ライブラリまたはヘッダーとCPPの直接コンパイル方式を使用してください。
 
 ## Quick Start
 

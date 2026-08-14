@@ -23,7 +23,7 @@ SOURCE_VERSION_PATTERN = re.compile(
 MARKDOWN_LINK_PATTERN = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
 GITHUB_URL_PLACEHOLDER = "{{GITHUB_REPOSITORY_URL}}"
 FIXED_ZIP_TIMESTAMP = (1980, 1, 1, 0, 0, 0)
-EXPECTED_FILE_COUNT = 28
+EXPECTED_FILE_COUNT = 27
 
 FORBIDDEN_DIRECTORY_NAMES = {
     ".git",
@@ -63,10 +63,6 @@ ARCHIVE_ENTRIES = (
     ArchiveEntry(
         "include/DxLImGui/DxLImGui.h",
         "include/DxLImGui/DxLImGui.h",
-    ),
-    ArchiveEntry(
-        "include/DxLImGui/DxLImGuiConfig.h",
-        "include/DxLImGui/DxLImGuiConfig.h",
     ),
     ArchiveEntry("src/DxLImGui.cpp", "src/DxLImGui.cpp"),
     ArchiveEntry(
@@ -224,21 +220,21 @@ def is_forbidden_archive_path(relative_path: PurePosixPath) -> bool:
 
 
 def read_source_version(project_root: Path) -> str:
-    config_path = (
+    header_path = (
         project_root
         / "include"
         / "DxLImGui"
-        / "DxLImGuiConfig.h"
+        / "DxLImGui.h"
     )
-    if not config_path.is_file():
-        raise ReleaseError(f"Missing version header: {config_path}")
+    if not header_path.is_file():
+        raise ReleaseError(f"Missing version header: {header_path}")
 
-    text = config_path.read_text(encoding="utf-8")
+    text = header_path.read_text(encoding="utf-8")
     match = SOURCE_VERSION_PATTERN.search(text)
     if match is None:
         raise ReleaseError(
             "DXLIMGUI_VERSION_STRING was not found in "
-            "DxLImGuiConfig.h."
+            "DxLImGui.h."
         )
     return match.group(1)
 

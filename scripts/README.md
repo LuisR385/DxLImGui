@@ -52,7 +52,7 @@ python scripts/make_release.py --help
 v0.1.0
 ```
 
-指定したバージョンから先頭の`v`を除いた値は、`include/DxLImGui/DxLImGuiConfig.h`の`DXLIMGUI_VERSION_STRING`と一致する必要があります。
+指定したバージョンから先頭の`v`を除いた値は、`include/DxLImGui/DxLImGui.h`の`DXLIMGUI_VERSION_STRING`と一致する必要があります。
 
 例えば、ヘッダーの値が`0.1.0`の場合に指定できるバージョンは`v0.1.0`です。一致しない場合、スクリプトはZIPを生成せず終了します。
 
@@ -88,7 +88,7 @@ scripts\make_release.bat v0.1.0 --force
 
 ## ZIPへ収録する内容
 
-スクリプトは、コード内の固定された許可リストにある28ファイルだけを収録します。
+スクリプトは、コード内の固定された許可リストにある27ファイルだけを収録します。
 
 - DxLImGuiの公開ヘッダーと実装
 - ビルドに必要なDear ImGui本体
