@@ -9,7 +9,9 @@
 //                                      * include/DxLImGui/DxLImGui.h
 //                                      * src/DxLImGui.cpp
 //
-//
+//                                              include指定する前に
+//                                          #define DXLIMGUI_IMPLEMENTATIONと書くと
+//                                              シングルヘッダDxLImGui.hだけで使用できます
 //										Author : Kojima Ryoichi (@LuisR385)
 //										Created Date : 2026 / 07 / 16
 //											LICENSE : MIT LICENSE
