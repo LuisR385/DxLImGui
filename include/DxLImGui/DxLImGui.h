@@ -159,8 +159,11 @@
 #pragma warning(pop)
 #endif
 
-
+#if __has_include(<imgui.h>)
 #include <imgui.h> // Dear ImGui
+#else
+//NOTE : imgui.hをincludeしてください    
+#endif
 
 #ifndef IMGUI_VERSION_NUM
 #error "Dear ImGui is required."
