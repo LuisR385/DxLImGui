@@ -127,6 +127,7 @@
 #endif
 
 // 必要に応じて、DxLImGui.hより前に0または1で定義できます。
+// TODO : 今はこれを使用してもなにもならない。(後から入れる予定)
 #ifndef DXLIMGUI_ENABLE_DEBUG_TOOLS
 #ifdef NDEBUG
 #define DXLIMGUI_ENABLE_DEBUG_TOOLS 0
