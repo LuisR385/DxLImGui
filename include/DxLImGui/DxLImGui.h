@@ -329,7 +329,6 @@ namespace DxLImGui
 		Image& operator=(const Image&) = delete;
 
 		// moveではGraphHandleと表示用登録の所有権を譲渡します。
-        // TODO : Imageの責任としてmoveは良いのか？譲渡拒否するか検討中
 		Image(Image&& other) noexcept;
 		Image& operator=(Image&& other) noexcept {
 			if (this == &other)
