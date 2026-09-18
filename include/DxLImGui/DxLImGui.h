@@ -477,6 +477,8 @@ namespace DxLImGui
 		DXLIMGUI_NODISCARD
 			ImVec2 GetSize() const noexcept;
 
+        bool Resize(int width, int height);
+
 		explicit operator bool() const noexcept;
 
 	private:
@@ -3527,6 +3529,16 @@ namespace DxLImGui
                 static_cast<float>(width_),
                 static_cast<float>(height_)
             );
+        }
+
+        bool RenderTarget::Resize(int width, int height)
+        {
+            if (width == width_ && height == height_)
+            {
+                return true;
+            }
+
+            return Create(width, height);
         }
 
 
