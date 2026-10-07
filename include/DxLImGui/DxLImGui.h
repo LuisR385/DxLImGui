@@ -1918,11 +1918,11 @@ namespace DxLImGui
         //DxLibのAPIの説明に沿ってreinterpret_castを使用する方針
 
         //デバイス獲得(強制解釈 / constキャスト削除)。DxLib側のAPIで説明に沿っています。
-        auto* device = reinterpret_cast<ID3D11Device*>
+        auto* device = static_cast<ID3D11Device*>
                     (const_cast<void*>(DxLib::GetUseDirect3D11Device()));
 
         //コンテキスト獲得(強制解釈 / constキャスト削除)。DxLib側のAPIで説明に沿っています。
-        auto* context = reinterpret_cast<ID3D11DeviceContext*>
+        auto* context = static_cast<ID3D11DeviceContext*>
                     (const_cast<void*>(DxLib::GetUseDirect3D11DeviceContext()));
 
 
