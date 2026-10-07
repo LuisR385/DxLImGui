@@ -17,7 +17,7 @@
 //											LICENSE : MIT LICENSE
 //
 //							WARNING : 今後 APIの名前空間のアクセスの仕方 / API名 / 挙動の変更の可能性があります。
-//
+//                                                    version 0.2.0
 // ---------------------------------------------------Design references----------------------------------------------------
 //                                              Dear ImGui ライブラリ Omar Cornut様
 //                                                     raylib / rlImGui
