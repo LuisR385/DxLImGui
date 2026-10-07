@@ -240,6 +240,17 @@ namespace DxLImGui
 
 	};
 
+    struct FontConfig
+    {
+        //ファイルパス
+        const char* filePath = nullptr;
+        //フォントサイズ
+        float sizePixels = 18.0f;
+
+        bool mergeMode = false;
+        bool pixelSnapH = false;
+    };
+
 
 
 	// DxLImGuiの画像キャッシュ登録だけを所有し、GraphHandleは所有しません。
@@ -521,7 +532,7 @@ namespace DxLImGui
 	DXLIMGUI_API void ApplyConfig(const DxLImGuiConfig& config = {});
 	DXLIMGUI_API void ApplyConfigFlags(const DxLImGuiConfig& config = {});
 	DXLIMGUI_API void ApplyConfigStyle(const DxLImGuiConfig& config); // NOTE : StylePreset引数にする予定
-	DXLIMGUI_API void ApplyFonts(const DxLImGuiConfig& config); //NOTE : v.0.1.0ではまだ未実装です。今後対応します
+	DXLIMGUI_API void ApplyFonts(const FontConfig& config); //NOTE : v.0.1.0ではまだ未実装です。今後対応します
 	//DxLibを初期化する前に呼んでください
 	//NOTE : Windows環境のディスプレイ拡大率100%の場合は任意
 	//TESTED ENVIROMENT :

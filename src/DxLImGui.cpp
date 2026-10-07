@@ -1248,8 +1248,16 @@ namespace DxLImGui
     }
 
     //TODO : Config引数からはがす予定->Font構造体の作成予定
-    void ApplyFonts(const DxLImGuiConfig& config) {
-        DXLIMGUI_UNUSED(config);
+    void ApplyFonts(const FontConfig& config) {
+        //DXLIMGUI_UNUSED(config);
+        ImGuiIO& io = ImGui::GetIO();
+
+        //TODO : 文字列char*だけどまだテストしていないので考えている
+        ImFont* font = io.Fonts->AddFontFromFileTTF(
+            config.filePath,
+            config.sizePixels
+        );
+
     }
 
     // DxLibが用意したDirectX 11デバイスをDear ImGuiへ接続します。
