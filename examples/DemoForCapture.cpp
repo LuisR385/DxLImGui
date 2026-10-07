@@ -7,8 +7,8 @@
 
 namespace
 {
-    constexpr const char* CaptureImagePath =
-        "DxLImGuiCaptureImage.png";
+    constexpr const wchar_t* CaptureImagePath =
+        L"DxLImGuiCaptureImage.png";
     constexpr int CaptureCycleMilliseconds = 12000;
 
     LRESULT CALLBACK CaptureWindowProc(
@@ -115,7 +115,6 @@ namespace
 int RunDemoForCapture(bool autoExit)
 {
 
-    DxLib::SetUseCharCodeFormat(DX_CHARCODEFORMAT_UTF8);
 
     DxLib::SetGraphMode(1280, 720, 32);
     DxLib::ChangeWindowMode(TRUE);
@@ -153,7 +152,7 @@ int RunDemoForCapture(bool autoExit)
         generatedImage.Load(CaptureImagePath);
     }
 
-    DeleteFileA(CaptureImagePath);
+    DeleteFileW(CaptureImagePath);
 
     DxLImGui::RenderTarget realtimeView(
         640,
@@ -231,7 +230,7 @@ int RunDemoForCapture(bool autoExit)
             DxLib::DrawString(
                 24,
                 24,
-                "MakeScreen -> Texture2D -> SRV -> ImGui::Image",
+                L"MakeScreen -> Texture2D -> SRV -> ImGui::Image",
                 DxLib::GetColor(255, 255, 255)
             );
 
@@ -265,7 +264,7 @@ int RunDemoForCapture(bool autoExit)
         DxLib::DrawString(
             20,
             690,
-            "DxLibは通常の状態があります", //DxLib normal drawing remains active.
+            L"DxLibは通常の状態があります", //DxLib normal drawing remains active.
             DxLib::GetColor(255, 255, 255)
         );
 

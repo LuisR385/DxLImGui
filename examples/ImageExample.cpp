@@ -5,8 +5,8 @@
 
 namespace
 {
-    constexpr const char* GeneratedImagePath =
-        "DxLImGuiGeneratedImage.png";
+    constexpr const wchar_t* GeneratedImagePath =
+        L"DxLImGuiGeneratedImage.png";
 
     LRESULT CALLBACK ImageWindowProc(
         HWND windowHandle,
@@ -75,8 +75,6 @@ namespace
 
 int RunImageExample(bool autoExit)
 {
-    //UTF8形式にフォーマット形式変更
-    DxLib::SetUseCharCodeFormat(DX_CHARCODEFORMAT_UTF8);
 
     DxLib::SetGraphMode(960, 540, 32);
     DxLib::ChangeWindowMode(TRUE);
@@ -111,7 +109,7 @@ int RunImageExample(bool autoExit)
     }
 
     // Load()完了後はDxLib側に画像があるため、一時PNGは削除できます。
-    DeleteFileA(GeneratedImagePath);
+    DeleteFileW(GeneratedImagePath);
 
     int frameCount = 0;
 

@@ -61,8 +61,8 @@ namespace DxLImGuiMakeScreenSrvCheck
         )
         {
             DxLib::LogFileFmtAdd(
-                "[MakeScreenSrvCheck] Texture2D=%p, Size=%ux%u, "
-                "MipLevels=%u, ArraySize=%u\n",
+                L"[MakeScreenSrvCheck] Texture2D=%p, Size=%ux%u, "
+                L"MipLevels=%u, ArraySize=%u\n",
                 texture,
                 description.Width,
                 description.Height,
@@ -71,33 +71,33 @@ namespace DxLImGuiMakeScreenSrvCheck
             );
 
             DxLib::LogFileFmtAdd(
-                "[MakeScreenSrvCheck] Format=%u (%s)\n",
+                L"[MakeScreenSrvCheck] Format=%u (%hs)\n",
                 static_cast<unsigned int>(description.Format),
                 GetFormatName(description.Format)
             );
 
             DxLib::LogFileFmtAdd(
-                "[MakeScreenSrvCheck] BindFlags=0x%08X, "
-                "SHADER_RESOURCE=%s, RENDER_TARGET=%s\n",
+                L"[MakeScreenSrvCheck] BindFlags=0x%08X, "
+                L"SHADER_RESOURCE=%s, RENDER_TARGET=%s\n",
                 description.BindFlags,
                 (
                     description.BindFlags &
                     D3D11_BIND_SHADER_RESOURCE
                 ) != 0
-                    ? "yes"
-                    : "no",
+                    ? L"yes"
+                    : L"no",
                 (
                     description.BindFlags &
                     D3D11_BIND_RENDER_TARGET
                 ) != 0
-                    ? "yes"
-                    : "no"
+                    ? L"yes"
+                    : L"no"
             );
 
             DxLib::LogFileFmtAdd(
-                "[MakeScreenSrvCheck] SampleDesc.Count=%u, "
-                "SampleDesc.Quality=%u, Usage=%u, "
-                "CPUAccessFlags=0x%08X, MiscFlags=0x%08X\n",
+                L"[MakeScreenSrvCheck] SampleDesc.Count=%u, "
+                L"SampleDesc.Quality=%u, Usage=%u, "
+                L"CPUAccessFlags=0x%08X, MiscFlags=0x%08X\n",
                 description.SampleDesc.Count,
                 description.SampleDesc.Quality,
                 static_cast<unsigned int>(description.Usage),
@@ -156,7 +156,7 @@ namespace DxLImGuiMakeScreenSrvCheck
                 16,
                 16,
                 DxLib::GetColor(255, 255, 255),
-                "MakeScreen frame: %llu",
+                L"MakeScreen frame: %llu",
                 static_cast<unsigned long long>(frameNumber)
             );
 
@@ -180,7 +180,7 @@ namespace DxLImGuiMakeScreenSrvCheck
 
 
         DxLib::LogFileAdd(
-            "[MakeScreenSrvCheck] BEGIN\n"
+            L"[MakeScreenSrvCheck] BEGIN\n"
         );
 
         // graphHandle はこの検証関数が所有し、最後に DeleteGraph します。
@@ -192,14 +192,14 @@ namespace DxLImGuiMakeScreenSrvCheck
             );
 
         DxLib::LogFileFmtAdd(
-            "[MakeScreenSrvCheck] MakeScreen result=%d\n",
+            L"[MakeScreenSrvCheck] MakeScreen result=%d\n",
             graphHandle
         );
 
         if (graphHandle < 0)
         {
             DxLib::LogFileAdd(
-                "[MakeScreenSrvCheck] FAIL: MakeScreen failed\n"
+                L"[MakeScreenSrvCheck] FAIL: MakeScreen failed\n"
             );
 
             return 1;
@@ -218,8 +218,8 @@ namespace DxLImGuiMakeScreenSrvCheck
         if (texture == nullptr)
         {
             DxLib::LogFileAdd(
-                "[MakeScreenSrvCheck] FAIL: "
-                "GetGraphID3D11Texture2D returned nullptr\n"
+                L"[MakeScreenSrvCheck] FAIL: "
+                L"GetGraphID3D11Texture2D returned nullptr\n"
             );
 
             DxLib::DeleteGraph(graphHandle);
@@ -243,8 +243,8 @@ namespace DxLImGuiMakeScreenSrvCheck
         if (device == nullptr)
         {
             DxLib::LogFileAdd(
-                "[MakeScreenSrvCheck] FAIL: "
-                "GetUseDirect3D11Device returned nullptr\n"
+                L"[MakeScreenSrvCheck] FAIL: "
+                L"GetUseDirect3D11Device returned nullptr\n"
             );
 
             DxLib::DeleteGraph(graphHandle);
@@ -264,12 +264,12 @@ namespace DxLImGuiMakeScreenSrvCheck
             );
 
         DxLib::LogFileFmtAdd(
-            "[MakeScreenSrvCheck] CreateShaderResourceView "
-            "HRESULT=0x%08lX, succeeded=%s, SRV=%p\n",
+            L"[MakeScreenSrvCheck] CreateShaderResourceView "
+            L"HRESULT=0x%08lX, succeeded=%s, SRV=%p\n",
             static_cast<unsigned long>(createSrvResult),
             SUCCEEDED(createSrvResult)
-                ? "yes"
-                : "no",
+                ? L"yes"
+                : L"no",
             shaderResourceView.Get()
         );
 
@@ -279,8 +279,8 @@ namespace DxLImGuiMakeScreenSrvCheck
         )
         {
             DxLib::LogFileAdd(
-                "[MakeScreenSrvCheck] FAIL: "
-                "direct SRV creation failed\n"
+                L"[MakeScreenSrvCheck] FAIL: "
+                L"direct SRV creation failed\n"
             );
 
             shaderResourceView.Reset();
@@ -435,8 +435,8 @@ namespace DxLImGuiMakeScreenSrvCheck
             if (frameNumber % 60 == 0)
             {
                 DxLib::LogFileFmtAdd(
-                    "[MakeScreenSrvCheck] frame=%llu, "
-                    "SRV=%p, refreshSuccessCount=%llu\n",
+                    L"[MakeScreenSrvCheck] frame=%llu, "
+                    L"SRV=%p, refreshSuccessCount=%llu\n",
                     static_cast<unsigned long long>(
                         frameNumber
                     ),
@@ -466,17 +466,17 @@ namespace DxLImGuiMakeScreenSrvCheck
             refreshSuccessCount == frameNumber;
 
         DxLib::LogFileFmtAdd(
-            "[MakeScreenSrvCheck] RESULT=%s, frames=%llu, "
-            "sameSrv=%s, refreshSuccessCount=%llu\n",
+            L"[MakeScreenSrvCheck] RESULT=%s, frames=%llu, "
+            L"sameSrv=%s, refreshSuccessCount=%llu\n",
             verificationSucceeded
-                ? "PASS"
-                : "FAIL",
+                ? L"PASS"
+                : L"FAIL",
             static_cast<unsigned long long>(
                 frameNumber
             ),
             sameSrvEveryFrame
-                ? "yes"
-                : "no",
+                ? L"yes"
+                : L"no",
             static_cast<unsigned long long>(
                 refreshSuccessCount
             )
@@ -489,14 +489,14 @@ namespace DxLImGuiMakeScreenSrvCheck
         shaderResourceView.Reset();
 
         DxLib::LogFileAdd(
-            "[MakeScreenSrvCheck] SRV released before DeleteGraph\n"
+            L"[MakeScreenSrvCheck] SRV released before DeleteGraph\n"
         );
 
         const int deleteGraphResult =
             DxLib::DeleteGraph(graphHandle);
 
         DxLib::LogFileFmtAdd(
-            "[MakeScreenSrvCheck] DeleteGraph result=%d\n",
+            L"[MakeScreenSrvCheck] DeleteGraph result=%d\n",
             deleteGraphResult
         );
 

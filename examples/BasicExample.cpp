@@ -24,7 +24,6 @@ namespace
 
 int RunBasicExample(bool autoExit)
 {
-    DxLib::SetUseCharCodeFormat(DX_CHARCODEFORMAT_UTF8);
 
     DxLib::SetGraphMode(960, 540, 32);
     DxLib::ChangeWindowMode(TRUE);
@@ -63,7 +62,7 @@ int RunBasicExample(bool autoExit)
         DxLib::DrawString(
             20,
             20,
-            u8"DxLibはImGuiの裏で描画されています ExampleFile : BasicExample.cpp", //DxLib is rendering behind Dear ImGui.ExampleFile : BasicExample.cpp
+            L"DxLibはImGuiの裏で描画されています ExampleFile : BasicExample.cpp", //DxLib is rendering behind Dear ImGui.ExampleFile : BasicExample.cpp
             DxLib::GetColor(255, 255, 255)
         );
 

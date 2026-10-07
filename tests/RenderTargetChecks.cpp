@@ -16,8 +16,8 @@ namespace DxLImGuiRenderTargetChecks
     namespace
     {
         constexpr int AutomaticFrameCount = 240;
-        constexpr const char* AlphaImagePath =
-            "DxLImGui_RenderTarget_Alpha_Check.png";
+        constexpr const wchar_t* AlphaImagePath =
+            L"DxLImGui_RenderTarget_Alpha_Check.png";
 
 
         bool IsDeletedGraphHandle(int graphHandle)
@@ -456,7 +456,7 @@ namespace DxLImGuiRenderTargetChecks
                 12,
                 12,
                 DxLib::GetColor(255, 255, 255),
-                "RenderTarget frame: %d",
+                L"RenderTarget frame: %d",
                 frame
             );
         }
@@ -466,7 +466,7 @@ namespace DxLImGuiRenderTargetChecks
     int Run(bool autoExit)
     {
         DxLib::LogFileFmtAdd(
-            "[RenderTargetChecks] BEGIN\n"
+            L"[RenderTargetChecks] BEGIN\n"
         );
 
         bool passed = RunOwnershipChecks();
@@ -502,7 +502,7 @@ namespace DxLImGuiRenderTargetChecks
             alphaPngCreated &&
             loadedAlphaImage.Load(AlphaImagePath);
 
-        DeleteFileA(AlphaImagePath);
+        DeleteFileW(AlphaImagePath);
 
         DxLImGui::Image movedAlphaImage(
             std::move(loadedAlphaImage)
@@ -750,20 +750,20 @@ namespace DxLImGuiRenderTargetChecks
             shutdownDeleteResult != -1;
 
         DxLib::LogFileFmtAdd(
-            "[RenderTargetChecks] RESULT=%s, Frames=%d, "
-            "Draw=%s, DoubleBegin=%s, DoubleEnd=%s, "
-            "Sequential=%s, DeferredReset=%s, ImageMove=%s, "
-            "Alpha=%s, Shutdown=%s\n",
-            passed ? "PASS" : "FAIL",
+            L"[RenderTargetChecks] RESULT=%s, Frames=%d, "
+            L"Draw=%s, DoubleBegin=%s, DoubleEnd=%s, "
+            L"Sequential=%s, DeferredReset=%s, ImageMove=%s, "
+            L"Alpha=%s, Shutdown=%s\n",
+            passed ? L"PASS" : L"FAIL",
             frame,
-            drawSubmitted ? "yes" : "no",
-            doubleBeginRejected ? "rejected" : "failed",
-            doubleEndSafe ? "safe" : "failed",
-            sequentialTargetsWorked ? "yes" : "no",
-            deferredResetWorked ? "yes" : "no",
-            imageMoveWorked ? "yes" : "no",
-            alphaPreserved ? "yes" : "no",
-            shutdownReleasedContext ? "yes" : "no"
+            drawSubmitted ? L"yes" : L"no",
+            doubleBeginRejected ? L"rejected" : L"failed",
+            doubleEndSafe ? L"safe" : L"failed",
+            sequentialTargetsWorked ? L"yes" : L"no",
+            deferredResetWorked ? L"yes" : L"no",
+            imageMoveWorked ? L"yes" : L"no",
+            alphaPreserved ? L"yes" : L"no",
+            shutdownReleasedContext ? L"yes" : L"no"
         );
 
         return passed ? 0 : 1;

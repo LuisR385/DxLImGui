@@ -24,7 +24,6 @@ namespace
 
 int RunAdvancedExample(bool autoExit)
 {
-    DxLib::SetUseCharCodeFormat(DX_CHARCODEFORMAT_UTF8);
 
     DxLib::SetGraphMode(960, 540, 32);
     DxLib::ChangeWindowMode(TRUE);
@@ -92,7 +91,7 @@ int RunAdvancedExample(bool autoExit)
                 DxLib::DrawString(
                     16,
                     16,
-                    "Raw GraphHandle registered through Advanced API",
+                    L"Raw GraphHandle registered through Advanced API",
                     DxLib::GetColor(255, 255, 255)
                 );
                 DxLib::RenderVertex();

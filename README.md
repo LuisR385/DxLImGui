@@ -248,7 +248,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
         DxLib::DrawString(
             20,
             20,
-            "DxLib is rendering.",
+            L"DxLib is rendering.",
             DxLib::GetColor(255, 255, 255)
         );
 
@@ -333,7 +333,7 @@ Win32モードからこの補助コードを呼ぶと入力イベントが混在
 コピーはできませんが、moveできます。
 
 ```cpp
-DxLImGui::Image image("assets/sample.png");
+DxLImGui::Image image(L"assets/sample.png");
 
 while (DxLib::ProcessMessage() == 0)
 {
@@ -615,7 +615,10 @@ READMEのQuick StartはBasicサンプルと同じ公開API・初期化順を使�
   生存中の`Image` / `RenderTarget`の表示登録を無効にします。通常コードでは
   呼ばないでください。
 - APIはスレッドセーフ用途を想定していません。
-- 画像パスの公開APIは`const char*`です。
+- 画像パスの公開API（`Image`、`Image::Load`、`LoadImageFromFile`）は`const wchar_t*`（UTF-16）です。`WCHAR*`や`L"assets/画像.png"`を渡せます。
+  Visual Studioでは「Unicode文字セットを使用する」を選択し、ソースから組み込む場合も`UNICODE`と`_UNICODE`を全翻訳単位で定義してください。
+  手動でDxLibのライブラリを指定する場合は`DxLibW` / `DxUseCLibW`のUnicode版を使用してください。
+  Dear ImGuiのラベル・テキストには引き続きUTF-8の`const char*`を使用します。
 - Multi-Viewportは基本動作のみ確認しており、複数モニター・異種DPI環境は未検証です。
 - 描画先の復元に失敗したRenderTargetは、安全のためGraphHandleを削除しません。
 

@@ -24,7 +24,6 @@ namespace
 
 int RunRenderTargetExample(bool autoExit)
 {
-    DxLib::SetUseCharCodeFormat(DX_CHARCODEFORMAT_UTF8);
 
 
     DxLib::SetGraphMode(1280, 720, 32);
@@ -89,7 +88,7 @@ int RunRenderTargetExample(bool autoExit)
             DxLib::DrawString(
                 20,
                 20,
-                "MakeScreen APIの中にDxLibが描画されています", // Drawn by DxLib into MakeScreen
+                L"MakeScreen APIの中にDxLibが描画されています", // Drawn by DxLib into MakeScreen
                 DxLib::GetColor(255, 255, 255)
             );
 

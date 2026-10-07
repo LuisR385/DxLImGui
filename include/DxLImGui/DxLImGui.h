@@ -28,7 +28,9 @@
 //                                          Copyright (c) 2026 Kojima Ryoichi
 //=======================================================================================================================
 
-
+//======================================================================================================================
+// - v0.2.0 LOG : 各引数の文字列を扱うchar型からワイド文字のwcharの引き渡しに変更 (dxlibの仕様に合わせるため)
+//======================================================================================================================
 
 #pragma once
 
@@ -320,7 +322,8 @@ namespace DxLImGui
 	public:
 		Image() noexcept = default;
 
-		explicit Image(const char* filePath);
+		explicit Image(const wchar_t* filePath);
+        
 
 		~Image();
 
@@ -352,7 +355,7 @@ namespace DxLImGui
 
 		// DxLibが未初期化、パスが無効、画像またはSRVの作成に失敗した場合は
 		// falseを返します。失敗時は現在所有している画像を維持します。
-		bool Load(const char* filePath);
+		bool Load(const wchar_t* filePath);
 
 		// SRV登録を解除してから、所有するGraphHandleを破棄します。
 		// Building中に呼んだ場合、実際の破棄はEndFrameまで遅延されます。
@@ -580,7 +583,7 @@ namespace DxLImGui
     
 	//読み込み
 	DXLIMGUI_NODISCARD
-	DXLIMGUI_API Image LoadImageFromFile(const char* path);
+	DXLIMGUI_API Image LoadImageFromFile(const wchar_t* path);
 
     DXLIMGUI_NODISCARD
         DXLIMGUI_API RenderTarget CreateRenderTarget(int width, int height, bool alpha = true);
@@ -1024,8 +1027,8 @@ namespace
 #if DXLIMGUI_ENABLE_DEBUG_TOOLS
         // 登録時に一度だけ出力します。毎フレームのログは行いません。
         DxLib::LogFileFmtAdd(
-            "[DxLImGui] Graph SRV: Handle=%d, Size=%ux%u, "
-            "Format=%u, BindFlags=0x%08X, SampleCount=%u\n",
+            L"[DxLImGui] Graph SRV: Handle=%d, Size=%ux%u, "
+            L"Format=%u, BindFlags=0x%08X, SampleCount=%u\n",
             graphHandle,
             textureDescription.Width,
             textureDescription.Height,
@@ -1060,8 +1063,8 @@ namespace
 
 #if DXLIMGUI_ENABLE_DEBUG_TOOLS
         DxLib::LogFileFmtAdd(
-            "[DxLImGui] CreateShaderResourceView: "
-            "Handle=%d, HRESULT=0x%08X\n",
+            L"[DxLImGui] CreateShaderResourceView: "
+            L"Handle=%d, HRESULT=0x%08X\n",
             graphHandle,
             static_cast<unsigned int>(result)
         );
@@ -1706,7 +1709,7 @@ namespace
         if (!IsKnownInputBackend(config.inputBackend))
         {
             DxLib::LogFileAdd(
-                "[DxLImGui] Initialize rejected: unknown InputBackend.\n"
+                L"[DxLImGui] Initialize rejected: unknown InputBackend.\n"
             );
             return false;
         }
@@ -1718,10 +1721,10 @@ namespace
         )
         {
             DxLib::LogFileAdd(
-                "[DxLImGui] Initialize rejected: Custom input does not "
-                "initialize the Win32 platform backend and cannot use "
-                "Multi-Viewport. Use InputBackend::Win32 or "
-                "disable ViewportsEnable.\n"
+                L"[DxLImGui] Initialize rejected: Custom input does not "
+                L"initialize the Win32 platform backend and cannot use "
+                L"Multi-Viewport. Use InputBackend::Win32 or "
+                L"disable ViewportsEnable.\n"
             );
             return false;
         }
@@ -1733,8 +1736,8 @@ namespace
         )
         {
             DxLib::LogFileAdd(
-                "[DxLImGui] Initialize rejected: Custom input requires "
-                "customInputCallback.\n"
+                L"[DxLImGui] Initialize rejected: Custom input requires "
+                L"customInputCallback.\n"
             );
             return false;
         }
@@ -1814,8 +1817,8 @@ namespace DxLImGui
         if (customInputIsActive && config.ViewportsEnable)
         {
             DxLib::LogFileAdd(
-                "[DxLImGui] ViewportsEnable ignored: Custom input does "
-                "not initialize the Win32 platform backend.\n"
+                L"[DxLImGui] ViewportsEnable ignored: Custom input does "
+                L"not initialize the Win32 platform backend.\n"
             );
         }
 
@@ -2594,7 +2597,7 @@ namespace DxLImGui
     }
 
     //高レベルAPI
-    Image LoadImageFromFile(const char* path)
+    Image LoadImageFromFile(const wchar_t* path)
     {
         //return Image(path);
         //可読性重視のためコンストラクタは使用せずLoadにする
@@ -2892,7 +2895,7 @@ namespace DxLImGui
 
 
 
-        Image::Image(const char* filePath)
+        Image::Image(const wchar_t* filePath)
         {
             this->Load(filePath);
         }
@@ -2913,11 +2916,11 @@ namespace DxLImGui
             Reset();
         }
 
-        bool Image::Load(const char* filePath)
+        bool Image::Load(const wchar_t* filePath)
         {
             if (
                 filePath == nullptr ||
-                filePath[0] == '\0' ||
+                filePath[0] == L'\0' ||
                 DxLib::DxLib_IsInit() == FALSE
             )
             {
