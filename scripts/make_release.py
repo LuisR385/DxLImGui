@@ -23,7 +23,7 @@ SOURCE_VERSION_PATTERN = re.compile(
 MARKDOWN_LINK_PATTERN = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
 GITHUB_URL_PLACEHOLDER = "{{GITHUB_REPOSITORY_URL}}"
 FIXED_ZIP_TIMESTAMP = (1980, 1, 1, 0, 0, 0)
-EXPECTED_FILE_COUNT = 27
+EXPECTED_FILE_COUNT = 30
 
 FORBIDDEN_DIRECTORY_NAMES = {
     ".git",
@@ -60,6 +60,9 @@ ARCHIVE_ENTRIES = (
         "THIRD_PARTY_NOTICES.md",
     ),
     ArchiveEntry("LICENSE", "LICENSE"),
+    ArchiveEntry("extras/dxlib_input/DxLibInput.h", "extras/dxlib_input/DxLibInput.h"),
+    ArchiveEntry("extras/dxlib_input/DxLibInput.cpp", "extras/dxlib_input/DxLibInput.cpp"),
+    ArchiveEntry("extras/dxlib_input/README.md", "extras/dxlib_input/README.md"),
     ArchiveEntry(
         "include/DxLImGui/DxLImGui.h",
         "include/DxLImGui/DxLImGui.h",

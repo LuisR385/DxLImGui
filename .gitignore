@@ -27,3 +27,7 @@ local/
 
 # dist files
 dist/
+
+# Source release documentation (not build output)
+!/release/
+!/release/**

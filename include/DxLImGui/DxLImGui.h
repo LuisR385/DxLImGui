@@ -532,7 +532,7 @@ namespace DxLImGui
 	DXLIMGUI_API void ApplyConfig(const DxLImGuiConfig& config = {});
 	DXLIMGUI_API void ApplyConfigFlags(const DxLImGuiConfig& config = {});
 	DXLIMGUI_API void ApplyConfigStyle(const DxLImGuiConfig& config); // NOTE : StylePreset引数にする予定
-	DXLIMGUI_API void ApplyFonts(const FontConfig& config); //NOTE : v.0.1.0ではまだ未実装です。今後対応します
+	DXLIMGUI_API void ApplyFonts(const FontConfig& config); // 試験的API。有効なフォントパスを指定し、明示的に呼び出します。
 	//DxLibを初期化する前に呼んでください
 	//NOTE : Windows環境のディスプレイ拡大率100%の場合は任意
 	//TESTED ENVIROMENT :
@@ -1897,8 +1897,16 @@ namespace DxLImGui
     }
 
     //TODO : Config引数からはがす予定->Font構造体の作成予定
-    void ApplyFonts(const DxLImGuiConfig& config) {
-        DXLIMGUI_UNUSED(config);
+    void ApplyFonts(const FontConfig& config) {
+        //DXLIMGUI_UNUSED(config);
+        ImGuiIO& io = ImGui::GetIO();
+
+        //TODO : 文字列char*だけどまだテストしていないので考えている
+        ImFont* font = io.Fonts->AddFontFromFileTTF(
+            config.filePath,
+            config.sizePixels
+        );
+
     }
 
     // DxLibが用意したDirectX 11デバイスをDear ImGuiへ接続します。
