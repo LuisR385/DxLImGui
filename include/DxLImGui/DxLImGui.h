@@ -32,7 +32,7 @@
 #pragma once
 
 #if !defined(_WIN32)
-#error "DxLImGui supports Windows only."
+    #error "DxLImGui supports Windows only."
 #endif
 
 #define DXLIMGUI_PLATFORM_WINDOWS 1
@@ -64,7 +64,7 @@
 // ============================================================
 
 #if defined(DXLIMGUI_BUILD_SHARED) && !defined(DXLIMGUI_BUILD_DLL)
-#define DXLIMGUI_BUILD_DLL
+    #define DXLIMGUI_BUILD_DLL
 #endif
 
 #if defined(DXLIMGUI_SHARED) && \
@@ -74,21 +74,21 @@
 #endif
 
 #if defined(DXLIMGUI_BUILD_DLL) && defined(DXLIMGUI_USE_DLL)
-#error "DXLIMGUI_BUILD_DLL and DXLIMGUI_USE_DLL cannot be used together."
+    #error "DXLIMGUI_BUILD_DLL and DXLIMGUI_USE_DLL cannot be used together."
 #endif
 
 #if defined(DXLIMGUI_STATIC) && \
 	(defined(DXLIMGUI_BUILD_DLL) || defined(DXLIMGUI_USE_DLL))
-#error "DXLIMGUI_STATIC cannot be combined with a DLL link mode."
+    #error "DXLIMGUI_STATIC cannot be combined with a DLL link mode."
 #endif
 
 #ifndef DXLIMGUI_API
-#if defined(DXLIMGUI_BUILD_DLL)
-#define DXLIMGUI_API __declspec(dllexport)
-#elif defined(DXLIMGUI_USE_DLL)
-#define DXLIMGUI_API __declspec(dllimport)
+   #if defined(DXLIMGUI_BUILD_DLL)
+        #define DXLIMGUI_API __declspec(dllexport)
+   #elif defined(DXLIMGUI_USE_DLL)
+        #define DXLIMGUI_API __declspec(dllimport)
 #else
-#define DXLIMGUI_API
+    #define DXLIMGUI_API
 #endif
 #endif
 
@@ -97,49 +97,49 @@
 // ============================================================
 
 #if defined(_MSC_VER)
-#define DXLIMGUI_FORCE_INLINE __forceinline
-#define DXLIMGUI_NO_INLINE __declspec(noinline)
+    #define DXLIMGUI_FORCE_INLINE __forceinline
+    #define DXLIMGUI_NO_INLINE __declspec(noinline)
 #elif defined(__GNUC__) || defined(__clang__)
-#define DXLIMGUI_FORCE_INLINE inline __attribute__((always_inline))
-#define DXLIMGUI_NO_INLINE __attribute__((noinline))
+    #define DXLIMGUI_FORCE_INLINE inline __attribute__((always_inline))
+    #define DXLIMGUI_NO_INLINE __attribute__((noinline))
 #else
-#define DXLIMGUI_FORCE_INLINE inline
-#define DXLIMGUI_NO_INLINE
+    #define DXLIMGUI_FORCE_INLINE inline
+    #define DXLIMGUI_NO_INLINE
 #endif
 
 #if defined(__has_cpp_attribute)
-#if __has_cpp_attribute(nodiscard)
-#define DXLIMGUI_NODISCARD [[nodiscard]]
+    #if __has_cpp_attribute(nodiscard)
+        #define DXLIMGUI_NODISCARD [[nodiscard]]
+    #else
+        #define DXLIMGUI_NODISCARD
+    #endif
 #else
-#define DXLIMGUI_NODISCARD
-#endif
-#else
-#define DXLIMGUI_NODISCARD
+    #define DXLIMGUI_NODISCARD
 #endif
 
 #define DXLIMGUI_UNUSED(value) static_cast<void>(value)
 
 #ifndef DXLIMGUI_ASSERT
 #include <cassert>
-#define DXLIMGUI_ASSERT(expression) assert(expression)
+    #define DXLIMGUI_ASSERT(expression) assert(expression)
 #endif
 
 // 必要に応じて、DxLImGui.hより前に0または1で定義できます。
 // TODO : 今はこれを使用してもなにもならない。(後から入れる予定)
 #ifndef DXLIMGUI_ENABLE_DEBUG_TOOLS
-#ifdef NDEBUG
-#define DXLIMGUI_ENABLE_DEBUG_TOOLS 0
-#else
-#define DXLIMGUI_ENABLE_DEBUG_TOOLS 1
-#endif
+    #ifdef NDEBUG
+        #define DXLIMGUI_ENABLE_DEBUG_TOOLS 0
+    #else
+        #define DXLIMGUI_ENABLE_DEBUG_TOOLS 1
+    #endif
 #endif
 
 #ifndef DXLIMGUI_ENABLE_KEYBOARD_NAVIGATION
-#define DXLIMGUI_ENABLE_KEYBOARD_NAVIGATION 1
+    #define DXLIMGUI_ENABLE_KEYBOARD_NAVIGATION 1
 #endif
 
 #ifndef DXLIMGUI_ENABLE_GAMEPAD_NAVIGATION
-#define DXLIMGUI_ENABLE_GAMEPAD_NAVIGATION 1
+    #define DXLIMGUI_ENABLE_GAMEPAD_NAVIGATION 1
 #endif
 
 #include <cstddef>
@@ -147,33 +147,34 @@
 #include <utility>
 
 #ifndef NOMINMAX
-#define NOMINMAX
+    #define NOMINMAX
 #endif
 #include <Windows.h> // HWND, UINT, WPARAM, LPARAM
 
 #if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable: 4010)
+    #pragma warning(push)
+    #pragma warning(disable: 4010)
 #endif
+
 #include "DxLib.h"
 #if defined(_MSC_VER)
-#pragma warning(pop)
+    #pragma warning(pop)
 #endif
 
 #if __has_include(<imgui.h>)
-#include <imgui.h> // Dear ImGui
+    #include <imgui.h> // Dear ImGui
 #else
-//NOTE : imgui.hをincludeしてください
-#error "imgui.hをincludeしてください"
+    //NOTE : imgui.hをincludeしてください
+    #error "imgui.hをincludeしてください"
 #endif
 
 #ifndef IMGUI_VERSION_NUM
-#error "Dear ImGui is required."
+    #error "Dear ImGui is required."
 #endif
 
 // DxLImGuiは同梱版と同じDear ImGui 1.92.xを対象にします。
 #if IMGUI_VERSION_NUM < 19200 || IMGUI_VERSION_NUM >= 19300
-#error "DxLImGui requires Dear ImGui 1.92.x."
+    #error "DxLImGui requires Dear ImGui 1.92.x."
 #endif
 
 
