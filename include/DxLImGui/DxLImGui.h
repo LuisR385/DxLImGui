@@ -163,7 +163,8 @@
 #if __has_include(<imgui.h>)
 #include <imgui.h> // Dear ImGui
 #else
-//NOTE : imgui.hをincludeしてください    
+//NOTE : imgui.hをincludeしてください
+#error "imgui.hをincludeしてください"
 #endif
 
 #ifndef IMGUI_VERSION_NUM
