@@ -595,6 +595,23 @@ namespace DxLImGui
 	// ============================================================
 	namespace Advanced
 	{
+        // DxLImGui所有のContextを作成し、configを適用します。
+        // DxLib初期化前でも呼べます。既存Context・二重初期化はfalse。
+        // NOTE : 今のところImgui側の本体コンテキストを初期化する
+        DXLIMGUI_API bool InitializeContext(const DxLImGuiConfig& config = {});
+
+        // InitializeContext後、DxLibのDirectX 11初期化後に呼んでください。
+        // DxLibのウィンドウ／デバイスを使用します。Win32とDX11は順不同です。
+        // 所有ContextがCurrentでない場合、二重初期化、外部バックエンドとの
+        // 競合、必要なDxLib資源がない場合はfalseを返します。
+        // Custom入力ではInitializeWin32は使用できません。
+        // 失敗時は成功済みの段階を維持し、再試行またはShutdownできます。
+        DXLIMGUI_API bool InitializeWin32();
+        DXLIMGUI_API bool InitializeDX11();
+
+        // 必要な両バックエンド（CustomではDX11のみ）の初期化成功後に
+        // BeginFrameを呼んでください。途中状態もShutdownで解放できます。
+
 		DXLIMGUI_API bool RegisterImage(int graphHandle);
 		DXLIMGUI_API bool RegisterImage(
 			int graphHandle,

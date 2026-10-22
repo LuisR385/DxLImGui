@@ -284,9 +284,50 @@ namespace DxLImGuiSafetyChecks
     }
 
 
+    bool SplitInitializationChecks()
+    {
+        using namespace DxLImGui;
+        if (ImGui::GetCurrentContext() != nullptr)
+            return false;
+        bool passed = !Advanced::InitializeWin32() &&
+                      !Advanced::InitializeDX11();
+        if (!Advanced::InitializeContext())
+            return false;
+        ImGuiContext* owned = ImGui::GetCurrentContext();
+        passed = passed && !Advanced::InitializeContext() && !Initialize();
+        // No DxLib device: both backends must fail without destroying the context.
+        passed = passed && !Advanced::InitializeWin32() &&
+                 !Advanced::InitializeDX11() && ImGui::GetCurrentContext() == owned;
+        ImGuiContext* external = ImGui::CreateContext();
+        ImGui::SetCurrentContext(external);
+        passed = passed && !Advanced::InitializeWin32() &&
+                 !Advanced::InitializeDX11();
+        Shutdown();
+        passed = passed && ImGui::GetCurrentContext() == external;
+        ImGui::DestroyContext(external);
+        Shutdown();
+        passed = passed && Advanced::InitializeContext();
+        Shutdown();
+
+        DxLImGuiConfig custom;
+        custom.inputBackend = InputBackend::Custom;
+        passed = passed && !Advanced::InitializeContext(custom);
+        custom.customInputCallback = [](ImGuiIO&) {};
+        passed = passed && Advanced::InitializeContext(custom) &&
+                 !Advanced::InitializeWin32();
+        Shutdown();
+        DxLImGuiConfig throwing;
+        throwing.styleCallback = [](ImGuiStyle&) { throw 1; };
+        bool caught = false;
+        try { Advanced::InitializeContext(throwing); }
+        catch (...) { caught = true; }
+        return passed && caught && ImGui::GetCurrentContext() == nullptr;
+    }
+
     bool RunNonGraphicsChecks()
     {
         return
+            SplitInitializationChecks() &&
             ExistingContextIsNotTakenOver() &&
             ConfigFlagsCanBeDisabled() &&
             ConfigStyleIsApplied();

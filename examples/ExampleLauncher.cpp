@@ -42,7 +42,7 @@ namespace
     }
 
 
-    bool InitializeGraphicsChecks()
+    bool InitializeGraphicsChecks(bool splitInitialization)
     {
         DxLib::SetGraphMode(1280, 720, 32);
         DxLib::ChangeWindowMode(TRUE);
@@ -68,8 +68,22 @@ namespace
         DxLImGui::DxLImGuiConfig config;
         config.ViewportsEnable = false;
 
-        if (!DxLImGui::Initialize(config))
+        bool initialized = false;
+        if (splitInitialization)
         {
+            initialized = DxLImGui::Advanced::InitializeContext(config) &&
+                DxLImGui::Advanced::InitializeDX11() &&
+                !DxLImGui::Advanced::InitializeDX11() &&
+                DxLImGui::Advanced::InitializeWin32() &&
+                !DxLImGui::Advanced::InitializeWin32();
+        }
+        else
+        {
+            initialized = DxLImGui::Initialize(config);
+        }
+        if (!initialized)
+        {
+            DxLImGui::Shutdown();
             DxLib::DxLib_End();
             return false;
         }
@@ -172,9 +186,12 @@ int WINAPI WinMain(
             "--run-render-target-checks"
         );
 
-    if (makeScreenCheck || renderTargetCheck)
+    const bool splitInitialization =
+        HasArgument(commandLine, "--run-split-init-checks");
+
+    if (makeScreenCheck || renderTargetCheck || splitInitialization)
     {
-        if (!InitializeGraphicsChecks())
+        if (!InitializeGraphicsChecks(splitInitialization))
         {
             return 1;
         }

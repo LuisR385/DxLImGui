@@ -1256,132 +1256,134 @@ namespace DxLImGui
 
     }
 
-    // DxLibが用意したDirectX 11デバイスをDear ImGuiへ接続します。
-    // 標準モードだけ公式Win32バックエンドも初期化します。
-    // DxLib初期化後に呼ぶ必要があります。
-    bool Initialize(const DxLImGuiConfig& config) {
-
-        // 二重初期化は同じバックエンド資源やImGuiContextを複数回
-        // 所有する原因になるため、Debugでは呼び出し順の誤りを検出します。
-        DXLIMGUI_ASSERT(!g_RuntimeState.contextCreated);
-
-        // Releaseでも二重作成を行わず、既存状態を維持します。
-        if (g_RuntimeState.contextCreated) { return false; }
-
-        // 既にCurrent Contextがある場合、その所有者やバックエンド構成を
-        // DxLImGui側から判断できません。取り込まずに失敗させることで、
-        // 他者のImGuiContextを初期化・破棄する事故を防ぎます。
-        if (ImGui::GetCurrentContext() != nullptr)
+    namespace Advanced
+    {
+        bool InitializeContext(const DxLImGuiConfig& config)
         {
-            return false;
-        }
-
-        if (!ValidateInputConfig(config))
-        {
-            return false;
-        }
-
-        //DxLibのAPIの説明に沿ってreinterpret_castを使用する方針
-
-        //デバイス獲得(強制解釈 / constキャスト削除)。DxLib側のAPIで説明に沿っています。
-        auto* device = static_cast<ID3D11Device*>
-            (const_cast<void*>(DxLib::GetUseDirect3D11Device()));
-
-        //コンテキスト獲得(強制解釈 / constキャスト削除)。DxLib側のAPIで説明に沿っています。
-        auto* context = static_cast<ID3D11DeviceContext*>
-            (const_cast<void*>(DxLib::GetUseDirect3D11DeviceContext()));
-
-
-        //windowhandleの取得
-        const HWND windowhandle = DxLib::GetMainWindowHandle();
-
-        //エラーハンドルチェック
-        if (windowhandle == nullptr) {
-            return false;
-        }
-
-
-        if (device == nullptr || context == nullptr) {
-            return false;
-        }
-
-        IMGUI_CHECKVERSION();
-
-        ImGuiContext* createdContext =
-            ImGui::CreateContext();
-
-        if (createdContext == nullptr)
-        {
-            return false;
-        }
-
-        // ImGuiContextは内部を読まず、不透明なハンドルとして記録します。
-        // 以降は公開APIのSetCurrentContext/DestroyContextへ渡す場合と、
-        // Contextの同一性をポインタ比較する場合にだけ使用します。
-        g_RuntimeState.context = createdContext;
-        g_RuntimeState.contextCreated = true;
-        g_RuntimeState.inputBackend = config.inputBackend;
-        g_RuntimeState.customInputCallback =
-            config.customInputCallback;
-
-        // Configが取れるかTRY CATCH方式を利用する
-        // NOTE :今後ApplyConfigをbool APIにして
-        // 即時エラー確認ができるようにします
-
-        try
-        {
-            ApplyConfig(config);
-        }
-        catch (...)
-        {
-            ImGui::DestroyContext(createdContext);
-            g_RuntimeState = {};
-            throw;
-        }
-
-        // 標準モードではDear ImGui公式Win32バックエンドを無改造で
-        // 初期化します。Customモードは入力だけを部分的に差し替えず、
-        // プラットフォームバックエンド全体を利用者側へ委ねます。
-        if (config.inputBackend == InputBackend::Win32)
-        {
-            if (!ImGui_ImplWin32_Init(windowhandle))
+            if (g_RuntimeState.contextCreated ||
+                ImGui::GetCurrentContext() != nullptr ||
+                !ValidateInputConfig(config))
             {
-                if (
-                    ImGui::GetIO().BackendPlatformUserData !=
-                    nullptr
-                    )
-                {
-                    ImGui_ImplWin32_Shutdown();
-                }
-
-                ImGui::DestroyContext(createdContext);
-                g_RuntimeState = {};
                 return false;
             }
 
-            g_RuntimeState.win32Initialized = true;
+            IMGUI_CHECKVERSION();
+            ImGuiContext* createdContext = ImGui::CreateContext();
+            if (createdContext == nullptr)
+                return false;
+
+            g_RuntimeState.context = createdContext;
+            g_RuntimeState.contextCreated = true;
+            g_RuntimeState.inputBackend = config.inputBackend;
+            g_RuntimeState.customInputCallback = config.customInputCallback;
+            try
+            {
+                ApplyConfig(config);
+            }
+            catch (...)
+            {
+                Shutdown();
+                throw;
+            }
+
+            if (ImGui::GetCurrentContext() != createdContext)
+            {
+                Shutdown();
+                return false;
+            }
+            return true;
         }
 
-        if (!ImGui_ImplDX11_Init(device, context)) {
-            if (
-                ImGui::GetIO().BackendRendererUserData !=
-                nullptr
-                )
+        bool InitializeWin32()
+        {
+            if (!g_RuntimeState.contextCreated ||
+                ImGui::GetCurrentContext() != g_RuntimeState.context ||
+                g_RuntimeState.framePhase != FramePhase::Idle ||
+                g_RuntimeState.inputBackend != InputBackend::Win32 ||
+                g_RuntimeState.win32Initialized ||
+                DxLib::DxLib_IsInit() == FALSE)
             {
-                ImGui_ImplDX11_Shutdown();
+                return false;
             }
+            ImGuiIO& io = ImGui::GetIO();
+            const HWND window = DxLib::GetMainWindowHandle();
+            if (io.BackendPlatformUserData != nullptr ||
+                window == nullptr || !::IsWindow(window))
+            {
+                return false;
+            }
+            if (!ImGui_ImplWin32_Init(window))
+            {
+                if (io.BackendPlatformUserData != nullptr)
+                    ImGui_ImplWin32_Shutdown();
+                return false;
+            }
+            g_RuntimeState.win32Initialized = true;
+            return true;
+        }
 
-            if (g_RuntimeState.win32Initialized)
+        bool InitializeDX11()
+        {
+            if (!g_RuntimeState.contextCreated ||
+                ImGui::GetCurrentContext() != g_RuntimeState.context ||
+                g_RuntimeState.framePhase != FramePhase::Idle ||
+                g_RuntimeState.dx11Initialized ||
+                DxLib::DxLib_IsInit() == FALSE)
             {
-                ImGui_ImplWin32_Shutdown();
+                return false;
             }
-            ImGui::DestroyContext(createdContext);
-            g_RuntimeState = {};
+            ImGuiIO& io = ImGui::GetIO();
+            if (io.BackendRendererUserData != nullptr ||
+                (g_RuntimeState.inputBackend == InputBackend::Custom &&
+                 (g_RuntimeState.customInputCallback == nullptr ||
+                  (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) != 0)))
+            {
+                return false;
+            }
+            auto* device = static_cast<ID3D11Device*>(
+                const_cast<void*>(DxLib::GetUseDirect3D11Device()));
+            auto* context = static_cast<ID3D11DeviceContext*>(
+                const_cast<void*>(DxLib::GetUseDirect3D11DeviceContext()));
+            if (device == nullptr || context == nullptr)
+                return false;
+
+            if (!ImGui_ImplDX11_Init(device, context))
+            {
+                if (io.BackendRendererUserData != nullptr)
+                    ImGui_ImplDX11_Shutdown();
+                return false;
+            }
+            g_RuntimeState.dx11Initialized = true;
+            return true;
+        }
+    }
+
+    bool Initialize(const DxLImGuiConfig& config)
+    {
+        if (g_RuntimeState.contextCreated ||
+            ImGui::GetCurrentContext() != nullptr ||
+            DxLib::DxLib_IsInit() == FALSE)
+        {
             return false;
         }
+        if (!Advanced::InitializeContext(config))
+            return false;
 
-        g_RuntimeState.dx11Initialized = true;
-
+        try
+        {
+            if ((config.inputBackend == InputBackend::Win32 &&
+                 !Advanced::InitializeWin32()) ||
+                !Advanced::InitializeDX11())
+            {
+                Shutdown();
+                return false;
+            }
+        }
+        catch (...)
+        {
+            Shutdown();
+            throw;
+        }
         return true;
     }
 
