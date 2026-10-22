@@ -647,7 +647,7 @@ namespace
             return false;
         }
 
-        ImageCache& imageCache =
+        ImageCache& cache =
             GetImageCache();
 
         // 既存登録の所有者を無条件に奪わないことが、Scoped登録と
@@ -655,7 +655,7 @@ namespace
         if (
             !IsValidGraphHandle(graphHandle) ||
             IsGraphOwned(graphHandle) ||
-            imageCache.find(graphHandle) != imageCache.end()
+            cache.find(graphHandle) != cache.end()
             )
         {
             return false;
@@ -678,7 +678,7 @@ namespace
 
         try
         {
-            const auto insertResult = imageCache.emplace(
+            const auto insertResult = cache.emplace(
                 graphHandle,
                 std::move(imageResource)
             );
@@ -712,7 +712,7 @@ namespace
             return false;
         }
 
-        ImageCache& imageCache =
+        ImageCache& cache =
             GetImageCache();
 
         registrationId = 0;
@@ -721,7 +721,7 @@ namespace
             !IsValidGraphHandle(graphHandle) ||
             softImageHandle < 0 ||
             IsGraphOwned(graphHandle) ||
-            imageCache.find(graphHandle) != imageCache.end()
+            cache.find(graphHandle) != cache.end()
             )
         {
             return false;
@@ -744,7 +744,7 @@ namespace
 
         try
         {
-            const auto insertResult = imageCache.emplace(
+            const auto insertResult = cache.emplace(
                 graphHandle,
                 std::move(imageResource)
             );
@@ -776,7 +776,7 @@ namespace
             return false;
         }
 
-        ImageCache& imageCache =
+        ImageCache& cache =
             GetImageCache();
 
         if (graphHandle < 0 || registrationId == 0)
@@ -784,10 +784,10 @@ namespace
             return false;
         }
 
-        const auto imageIterator = imageCache.find(graphHandle);
+        const auto imageIterator = cache.find(graphHandle);
 
         return
-            imageIterator != imageCache.end() &&
+            imageIterator != cache.end() &&
             imageIterator->second.registrationId == registrationId &&
             !imageIterator->second.pendingRemoval;
     }
@@ -804,12 +804,12 @@ namespace
             return;
         }
 
-        ImageCache& imageCache =
+        ImageCache& cache =
             GetImageCache();
 
-        const auto imageIterator = imageCache.find(graphHandle);
+        const auto imageIterator = cache.find(graphHandle);
 
-        if (imageIterator == imageCache.end())
+        if (imageIterator == cache.end())
         {
             return;
         }
@@ -835,7 +835,7 @@ namespace
             return;
         }
 
-        imageCache.erase(imageIterator);
+        cache.erase(imageIterator);
     }
 
     void UnregisterOwnedGraphInternal(
@@ -864,14 +864,14 @@ namespace
 
         if (imageCacheAlive)
         {
-            ImageCache& imageCache =
+            ImageCache& cache =
                 GetImageCache();
 
             const auto imageIterator =
-                imageCache.find(graphHandle);
+                cache.find(graphHandle);
 
             if (
-                imageIterator != imageCache.end() &&
+                imageIterator != cache.end() &&
                 imageIterator->second.registrationId ==
                 registrationId
                 )
@@ -891,7 +891,7 @@ namespace
                 }
 
                 // erase完了時点でComPtrのSRVが解放されます。
-                imageCache.erase(imageIterator);
+                cache.erase(imageIterator);
             }
         }
 
@@ -909,13 +909,13 @@ namespace
             return;
         }
 
-        ImageCache& imageCache =
+        ImageCache& cache =
             GetImageCache();
 
-        while (!imageCache.empty())
+        while (!cache.empty())
         {
             const auto imageIterator =
-                imageCache.begin();
+                cache.begin();
             const int graphHandle =
                 imageIterator->first;
             const bool deleteGraph =
@@ -923,7 +923,7 @@ namespace
 
             // SRVのComPtrを先に破棄してから、必要なGraphHandleを
             // DxLibへ返します。
-            imageCache.erase(imageIterator);
+            cache.erase(imageIterator);
 
             if (
                 deleteGraph &&
@@ -943,7 +943,7 @@ namespace
             return;
         }
 
-        ImageCache& imageCache =
+        ImageCache& cache =
             GetImageCache();
 
         if (
@@ -957,7 +957,7 @@ namespace
 
         // Building中の描画コマンドはSRVを参照できるため、ここでは印だけを
         // 付けます。実際のComPtr解放はEndFrameの描画完了後に行います。
-        for (auto& imageEntry : imageCache)
+        for (auto& imageEntry : cache)
         {
             imageEntry.second.pendingRemoval = true;
         }
@@ -971,11 +971,11 @@ namespace
             return;
         }
 
-        ImageCache& imageCache =
+        ImageCache& cache =
             GetImageCache();
 
-        for (auto imageIterator = imageCache.begin();
-            imageIterator != imageCache.end();)
+        for (auto imageIterator = cache.begin();
+            imageIterator != cache.end();)
         {
             if (imageIterator->second.pendingRemoval)
             {
@@ -984,7 +984,7 @@ namespace
                 const bool deleteGraph =
                     imageIterator->second.deleteGraphWhenRemoved;
 
-                imageIterator = imageCache.erase(imageIterator);
+                imageIterator = cache.erase(imageIterator);
 
                 if (
                     deleteGraph &&
@@ -1735,13 +1735,13 @@ namespace DxLImGui
             return false;
         }
 
-        ImageCache& imageCache =
+        ImageCache& cache =
             GetImageCache();
 
-        const auto imageIterator = imageCache.find(graphHandle);
+        const auto imageIterator = cache.find(graphHandle);
 
         if (
-            imageIterator == imageCache.end() ||
+            imageIterator == cache.end() ||
             imageIterator->second.pendingRemoval
             )
         {
@@ -1768,7 +1768,7 @@ namespace DxLImGui
             return false;
         }
 
-        ImageCache& imageCache =
+        ImageCache& cache =
             GetImageCache();
 
         if (
@@ -1807,10 +1807,10 @@ namespace DxLImGui
 
         // 公開APIだけでは現在のImGuiウィンドウを確認できません。
         // ImGui::Begin()とImGui::End()の間で呼ぶことは利用側の契約です。
-        const auto imageIterator = imageCache.find(graphHandle);
+        const auto imageIterator = cache.find(graphHandle);
 
         if (
-            imageIterator == imageCache.end() ||
+            imageIterator == cache.end() ||
             imageIterator->second.pendingRemoval ||
             imageIterator->second.srv == nullptr
             )
