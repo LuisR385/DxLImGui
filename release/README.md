@@ -1,4 +1,4 @@
-# DxLImGui v0.2.0 Release Package
+# DxLImGui Release Package
 
 DxLImGuiは、Windows上でDxLibとDear ImGuiのDirectX 11バックエンドを
 接続するためのC++ライブラリです。
@@ -282,9 +282,9 @@ DxLib公式配布物の条件が適用されます。
 
 [LuisR385/DxLImGui](https://github.com/LuisR385/DxLImGui)
 
-## 0.2.0の追加機能
+## 機能・組み込みについて
 
-- `DXLIMGUI_IMPLEMENTATION`による単一ヘッダー形式に対応。1つの翻訳単位でのみ定義し、この場合は`src/DxLImGui.cpp`をコンパイルしないでください。Dear ImGui本体とバックエンドは引き続き必要です。
+- 公開ヘッダーと実装CPPを分離しています。`src/DxLImGui.cpp`を必ずコンパイル対象へ追加してください。旧単一ヘッダー形式の実装生成用マクロは削除してください。
 - `RenderTarget::Resize()`と`CreateRenderTarget()`を追加。
-- 任意のCustom入力向け参考実装を[extras/dxlib_input/README.md](extras/dxlib_input/README.md)に収録。Win32入力と同時に使用しないでください。
+- (試験的機能) : 任意のCustom入力向け参考実装を[extras/dxlib_input/README.md](extras/dxlib_input/README.md)に収録。Win32入力と同時に使用しないでください。
 - `ApplyFonts(FontConfig)`は試験的APIです。明示的に呼び出し、有効なフォントパスを指定してください。初期化時の自動読み込みは行いません。

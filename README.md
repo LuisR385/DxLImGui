@@ -141,26 +141,13 @@ DxLImGuiの公開ヘッダーは`include/DxLImGui/DxLImGui.h`の1ファイルで
 DxLib、Dear ImGui本体、`backends`を追加してください。ランタイムライブラリ
 （`/MT`、`/MTd`など）とDxLibのライブラリ種類も一致させます。
 
-### シングルヘッダーとして使用する
-
-実装を置く1つのCPPファイルだけで、インクルードより前に
-`DXLIMGUI_IMPLEMENTATION`を定義します。
-
-```cpp
-#define DXLIMGUI_IMPLEMENTATION
-#include <DxLImGui/DxLImGui.h>
-```
-
-`DXLIMGUI_IMPLEMENTATION`を複数の翻訳単位で定義すると実装が重複するため、
-必ず1か所だけで定義してください。Dear ImGuiのソースとDxLibのライブラリは、
-この方式でも別途コンパイル／リンクする必要があります。
-
 ### ヘッダーとCPPを直接コンパイルする
 
-マクロを定義せず、`include/DxLImGui/DxLImGui.h`と
-`src/DxLImGui.cpp`をプロジェクトへ追加します。`DxLImGui.cpp`は内部で
-`DXLIMGUI_IMPLEMENTATION`を定義する薄い互換用ソースです。さらに次の
-Dear ImGuiソースを同じプロジェクトでコンパイルします。
+`include/DxLImGui/DxLImGui.h`を参照し、実装の`src/DxLImGui.cpp`を
+プロジェクトのコンパイル対象へ追加します。実装はCPP側で管理します。
+以前の単一ヘッダー形式から移行する場合は、実装生成用マクロの定義を削除し、
+`src/DxLImGui.cpp`を追加してください。
+さらに次のDear ImGuiソースを同じプロジェクトでコンパイルします。
 
 - `imgui.cpp`
 - `imgui_draw.cpp`

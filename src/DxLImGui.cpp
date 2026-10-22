@@ -1,7 +1,3 @@
-// DxLImGuiの実装は公開ヘッダーへ統合されています。
-// このファイルをプロジェクトへ追加する従来の構成も引き続き使用できます。
-// NOTE : .h のみで使用したいときは、インクルードする前に以下のDXLIMGUI_IMPLEMENTATIONを記述します。
-//#define DXLIMGUI_IMPLEMENTATION
 #include <DxLImGui/DxLImGui.h>
 // ============================================================================
 //
@@ -2264,6 +2260,26 @@ namespace DxLImGui
     }
 
 
+
+    Image& Image::operator=(Image&& other) noexcept {
+        if (this == &other)
+        {
+            return *this;
+        }
+
+        Reset();
+
+        graphHandle_ = other.graphHandle_;
+        width_ = other.width_;
+        height_ = other.height_;
+        registration_ = std::move(other.registration_);
+
+        other.graphHandle_ = -1;
+        other.width_ = 0;
+        other.height_ = 0;
+
+        return *this;
+    }
 
     Image::Image(const wchar_t* filePath)
     {
