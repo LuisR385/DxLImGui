@@ -50,7 +50,7 @@
 	 DXLIMGUI_VERSION_MINOR * 100 + \
 	 DXLIMGUI_VERSION_PATCH)
 
-#define DXLIMGUI_VERSION_STRING "0.2.0"
+#define DXLIMGUI_VERSION_STRING "0.2.1"
 
 // ============================================================
 // Link mode
