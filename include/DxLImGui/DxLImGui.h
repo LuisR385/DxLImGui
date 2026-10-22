@@ -43,14 +43,14 @@
 
 #define DXLIMGUI_VERSION_MAJOR 0
 #define DXLIMGUI_VERSION_MINOR 2
-#define DXLIMGUI_VERSION_PATCH 1
+#define DXLIMGUI_VERSION_PATCH 2
 
 #define DXLIMGUI_VERSION_NUM \
 	(DXLIMGUI_VERSION_MAJOR * 10000 + \
 	 DXLIMGUI_VERSION_MINOR * 100 + \
 	 DXLIMGUI_VERSION_PATCH)
 
-#define DXLIMGUI_VERSION_STRING "0.2.1"
+#define DXLIMGUI_VERSION_STRING "0.2.2"
 
 // ============================================================
 // Link mode
