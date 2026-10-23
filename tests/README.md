@@ -142,3 +142,12 @@ The smallest normal-use loop is also available in
 8. Prefer destroying `Image` and `RenderTarget` objects before
    `DxLImGui::Shutdown()`. Destruction after `Shutdown()` is still guarded and
    will delete an owned GraphHandle while DxLib remains initialized.
+
+## Split initialization checks
+
+`--run-safety-checks` verifies context-only cleanup, missing backends,
+duplicate initialization, foreign contexts, Custom input constraints,
+and cleanup after an exception in the style callback.
+
+`--run-split-init-checks --auto-exit` initializes DX11 before Win32, checks
+that duplicate backend initialization fails, and runs the RenderTarget suite.

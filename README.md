@@ -654,3 +654,35 @@ DxLImGui本体のMIT Licenseは、`thirdparty/`、Dear ImGui、
 両プロジェクトが提供する機能とドキュメントの上にDxLImGuiは構築されています。
 
 素敵なライブラリをありがとうございます。
+
+## 段階的な初期化（Advanced）
+
+通常は`DxLImGui::Initialize(config)`を使用します。個別に処理したい場合は、
+DxLibのDirectX 11初期化後に以下のように呼べます。
+
+```cpp
+DxLImGui::DxLImGuiConfig config;
+if (!DxLImGui::Advanced::InitializeContext(config))
+    return false;
+
+// 必要ならフォントなどのImGui設定を追加
+if (!DxLImGui::Advanced::InitializeWin32() ||
+    !DxLImGui::Advanced::InitializeDX11())
+{
+    DxLImGui::Shutdown();
+    return false;
+}
+// 通常のBeginFrame / EndFrameを使用し、終了時はShutdown → DxLib_End。
+```
+
+Context作成だけならDxLib初期化前でも可能です。Win32／DX11は順不同で、
+二重初期化は`false`です。失敗時は成功済みの段階を維持するので再試行でき、
+途中状態も`Shutdown()`で解放できます。外部Context／バックエンドは取り込みません。
+Custom入力ではコールバックを設定し、Win32初期化を省略します。
+必要なバックエンドが揃ってからフレームを開始してください。
+
+## v0.2.0からの移行
+
+単一ヘッダー形式を廃止しました。`DXLIMGUI_IMPLEMENTATION`の定義を削除し、
+`src/DxLImGui.cpp`をコンパイル対象に追加してください。
+静的ライブラリ／DLLを利用する場合は、そのライブラリを再ビルドしてください。

@@ -21,19 +21,19 @@
 Pythonスクリプトを直接実行する場合:
 
 ```powershell
-python scripts/make_release.py v0.2.0
+python scripts/make_release.py v0.2.2
 ```
 
 Python Launcherを使用する場合:
 
 ```powershell
-py -3 scripts/make_release.py v0.2.0
+py -3 scripts/make_release.py v0.2.2
 ```
 
 バッチファイルを使用する場合:
 
 ```bat
-scripts\make_release.bat v0.2.0
+scripts\make_release.bat v0.2.2
 ```
 
 バッチファイルは最初に`py -3`を試し、利用できない場合は`python`を使用します。渡された引数は、そのまま`make_release.py`へ渡されます。
@@ -49,12 +49,12 @@ python scripts/make_release.py --help
 バージョンは`vX.Y.Z`形式で指定します。
 
 ```text
-v0.2.0
+v0.2.2
 ```
 
 指定したバージョンから先頭の`v`を除いた値は、`include/DxLImGui/DxLImGui.h`の`DXLIMGUI_VERSION_STRING`と一致する必要があります。
 
-例えば、ヘッダーの値が`0.2.0`の場合に指定できるバージョンは`v0.2.0`です。一致しない場合、スクリプトはZIPを生成せず終了します。
+例えば、ヘッダーの値が`0.2.2`の場合に指定できるバージョンは`v0.2.2`です。一致しない場合、スクリプトはZIPを生成せず終了します。
 
 ## 生成物
 
@@ -62,11 +62,11 @@ v0.2.0
 
 ```text
 dist/
-├── DxLImGui-v0.2.0.zip
-└── DxLImGui-v0.2.0.zip.sha256
+├── DxLImGui-v0.2.2.zip
+└── DxLImGui-v0.2.2.zip.sha256
 ```
 
-ZIP内のルートディレクトリは`DxLImGui-v0.2.0/`です。
+ZIP内のルートディレクトリは`DxLImGui-v0.2.2/`です。
 
 処理の最後には、ZIPへ収録した全ファイル、生成先、SHA-256が表示されます。
 
@@ -75,13 +75,13 @@ ZIP内のルートディレクトリは`DxLImGui-v0.2.0/`です。
 同名のZIPまたはSHA-256ファイルが存在する場合、通常はエラーとして終了します。内容を確認したうえで上書きする場合だけ、`--force`を指定してください。
 
 ```powershell
-python scripts/make_release.py v0.2.0 --force
+python scripts/make_release.py v0.2.2 --force
 ```
 
 バッチファイルでも同じオプションを使用できます。
 
 ```bat
-scripts\make_release.bat v0.2.0 --force
+scripts\make_release.bat v0.2.2 --force
 ```
 
 `--force`は、対象バージョンと同名のZIPおよびSHA-256ファイルだけを置き換えます。
@@ -150,16 +150,16 @@ ZIPへは絶対パスを記録せず、`/`区切りの相対パスだけを使�
 PowerShellでは次のコマンドでZIPのSHA-256を確認できます。
 
 ```powershell
-Get-FileHash .\dist\DxLImGui-v0.2.0.zip -Algorithm SHA256
+Get-FileHash .\dist\DxLImGui-v0.2.2.zip -Algorithm SHA256
 ```
 
-表示された値が、`DxLImGui-v0.2.0.zip.sha256`に記載された値と一致することを確認してください。
+表示された値が、`DxLImGui-v0.2.2.zip.sha256`に記載された値と一致することを確認してください。
 
 ## 主なエラー
 
 ### `Version must use vX.Y.Z format`
 
-バージョンを`v0.2.0`のような形式で指定してください。
+バージョンを`v0.2.2`のような形式で指定してください。
 
 ### `Version mismatch`
 
